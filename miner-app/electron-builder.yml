@@ -1,0 +1,33 @@
+appId: xyz.marscredit.miner
+productName: Mars Credit Miner
+directories:
+  output: release
+files:
+  - dist/**/*
+  - dist-electron/**/*
+extraResources:
+  - from: resources/genesis.json
+    to: genesis.json
+mac:
+  category: public.app-category.finance
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+  icon: resources/icons/icon.png
+dmg:
+  contents:
+    - x: 130
+      y: 220
+    - x: 410
+      y: 220
+      type: link
+      path: /Applications
+win:
+  target:
+    - nsis
+  icon: resources/icons/icon.png
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true

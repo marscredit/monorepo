@@ -1,0 +1,134 @@
+@import url('https://fonts.googleapis.com/css2?family=Stack+Sans+Notch:wght@400;500;600;700;800&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Space blacks */
+  --bg: #0b0b0e;
+  --panel: #121218;
+  --muted: #1a1a22;
+  
+  /* Mars reds - Deeper Red */
+  --mars-950: #110000;
+  --mars-900: #220000;
+  --mars-800: #330000;
+  --mars-700: #550000;
+  --mars-600: #770000;
+  --mars-500: #990000;
+  --mars-400: #cc0000;
+  --mars-300: #ff4433;
+  --mars-200: #f66849;
+  --mars-100: #fcc2bb;
+  
+  /* Text hierarchy */
+  --text-hi: #ffffff;
+  --text-med: #c9c9d1;
+  --text-lo: #9a9aa3;
+  
+  /* Status colors */
+  --success: #2ecc71;
+  --warning: #f1c40f;
+  --danger: #e74c3c;
+}
+
+@layer base {
+  * {
+    @apply border-gray-800;
+  }
+  
+  html, body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+  
+  body {
+    @apply font-sans antialiased;
+    background-color: var(--bg);
+    color: var(--text-med);
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+    color: var(--text-hi);
+  }
+}
+
+@layer components {
+  /* Starfield background */
+  .stars {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .stars::before,
+  .stars::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: 
+      radial-gradient(2px 2px at 20% 30%, rgba(255,255,255,.6) 40%, transparent 41%),
+      radial-gradient(1px 1px at 80% 70%, rgba(255,255,255,.4) 40%, transparent 41%),
+      radial-gradient(1px 1px at 40% 90%, rgba(255,255,255,.3) 40%, transparent 41%),
+      radial-gradient(1px 1px at 60% 20%, rgba(255,255,255,.2) 40%, transparent 41%),
+      radial-gradient(2px 2px at 90% 40%, rgba(255,255,255,.5) 40%, transparent 41%);
+    background-size: 550px 550px, 350px 350px, 250px 250px, 150px 150px, 450px 450px;
+    animation: twinkle 8s linear infinite;
+  }
+  
+  .stars::after {
+    background-image: 
+      radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,.4) 40%, transparent 41%),
+      radial-gradient(2px 2px at 70% 80%, rgba(255,255,255,.3) 40%, transparent 41%),
+      radial-gradient(1px 1px at 10% 50%, rgba(255,255,255,.5) 40%, transparent 41%);
+    background-size: 400px 400px, 300px 300px, 200px 200px;
+    animation: twinkle 12s linear infinite reverse;
+  }
+  
+  /* Mars orb gradient */
+  .mars-orb {
+    background: conic-gradient(from 220deg at 50% 50%, #cc0000, #ff4433, #cc0000, #220000 75%, #121218 100%);
+    animation: orbit 20s linear infinite;
+  }
+  
+  /* Simple black cards */
+  .card-glow {
+    @apply relative rounded-2xl;
+    background: #000000;
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    transition: all 0.3s ease;
+  }
+  
+  .card-glow:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+    border-color: rgba(255,255,255,0.2);
+  }
+  
+  /* Button styles */
+  .btn-mars {
+    @apply relative inline-flex items-center justify-center rounded-xl px-6 py-3 font-semibold text-white;
+    background: #cc0000;
+    border: none;
+    box-shadow: 0 4px 20px rgba(204,0,0,0.3);
+    transition: all 0.2s ease;
+  }
+  
+  .btn-mars:hover {
+    background: #ff4433;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(204,0,0,0.4);
+  }
+  
+  .btn-mars:active {
+    transform: translateY(0);
+  }
+  
+  /* Text balance for better typography */
+  .text-balance {
+    text-wrap: balance;
+  }
+}
