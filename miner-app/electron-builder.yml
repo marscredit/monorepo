@@ -28,6 +28,8 @@ win:
   target:
     - nsis
   icon: resources/icons/icon.png
+  # Match shortcut target: installer creates shortcut to "Mars Credit Miner.exe"
+  executableName: Mars Credit Miner
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
