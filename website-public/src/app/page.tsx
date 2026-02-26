@@ -145,13 +145,13 @@ export default function HomePage() {
               transition={{ duration: 0.8, delay: 0.4 }}
               className="flex flex-col sm:flex-row gap-4 justify-center items-center"
             >
-              <Button size="lg" asChild className="border border-white/40 bg-transparent text-white hover:bg-white/10 hover:border-white/60 shadow-none">
+              <Button variant="ghost" size="lg" asChild className="border !border-white/40 bg-transparent text-white hover:bg-white/10 hover:!border-white/60 shadow-none">
                 <a href={downloadUrl}>
                   <Download className="mr-2 h-5 w-5" />
                   {downloadLabel}
                 </a>
               </Button>
-              <Button size="lg" asChild className="border border-white/40 bg-transparent text-white hover:bg-white/10 hover:border-white/60 shadow-none">
+              <Button variant="ghost" size="lg" asChild className="border !border-white/40 bg-transparent text-white hover:bg-white/10 hover:!border-white/60 shadow-none">
                 <a href={links.blockscan} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="mr-2 h-5 w-5" />
                   Explore Blockscan

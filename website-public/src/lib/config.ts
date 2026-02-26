@@ -6,7 +6,7 @@ export const site = {
 } as const
 
 export const network = {
-  chainId: Number(process.env.MARS_CHAIN_ID ?? 12345),
+  chainId: Number(process.env.MARS_CHAIN_ID ?? 110110),
   name: process.env.MARS_CHAIN_NAME ?? "Mars Credit",
   symbol: process.env.MARS_SYMBOL ?? "MARS",
   decimals: Number(process.env.MARS_DECIMALS ?? 18),

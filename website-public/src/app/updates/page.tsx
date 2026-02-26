@@ -13,6 +13,14 @@ import { CalendarDays, Clock, ArrowRight, Zap, Instagram, Send, MessageCircle } 
 // Mock data for now - in a real app this would come from MDX files or a CMS
 const updates = [
   {
+    slug: "mars-credit-miner-relaunch",
+    title: "Mars Credit Miner App Relaunched",
+    date: "2026-02-12",
+    summary: "We've relaunched the Mars Credit Miner — now available on Windows, macOS Apple Silicon, and macOS Intel. The new app supports multi-miner threading, letting you run multiple miners on different wallets simultaneously.",
+    tags: ["mining", "app", "windows", "macos"],
+    readTime: "4 min read",
+  },
+  {
     slug: "solana-bridge-paused",
     title: "Solana Bridge Paused",
     date: "2025-11-01",
@@ -68,6 +76,7 @@ const tagColors: Record<string, string> = {
   community: "bg-pink-500/20 text-pink-300",
   development: "bg-indigo-500/20 text-indigo-300",
   infrastructure: "bg-red-500/20 text-red-300",
+  windows: "bg-sky-500/20 text-sky-300",
 }
 
 function isNew(dateString: string): boolean {

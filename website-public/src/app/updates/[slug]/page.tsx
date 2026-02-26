@@ -19,6 +19,86 @@ const updates: Record<string, {
   tags: string[]
   content: React.ReactNode
 }> = {
+  "mars-credit-miner-relaunch": {
+    title: "Mars Credit Miner App Relaunched",
+    date: "2026-02-12",
+    readTime: "4 min read",
+    tags: ["mining", "app", "windows", "macos"],
+    content: (
+      <div className="prose prose-lg max-w-none prose-invert">
+        <p className="text-xl text-text-med leading-relaxed">
+          The Mars Credit Miner is back — completely rebuilt from the ground up as a
+          cross-platform desktop app. It now runs on Windows, macOS Apple Silicon, and
+          macOS Intel, making it easier than ever to start mining MARS.
+        </p>
+
+        <h2 className="text-2xl font-bold text-text-hi mt-8 mb-4">Cross-Platform Support</h2>
+        <p className="text-text-med leading-relaxed">
+          The new miner is built with Electron and bundles a full Geth node, so there is
+          nothing else to install. We ship three builds:
+        </p>
+        <ul className="text-text-med space-y-2">
+          <li>• <strong>macOS Apple Silicon</strong> — native ARM64 build for M-series Macs</li>
+          <li>• <strong>macOS Intel</strong> — x64 build for older Macs</li>
+          <li>• <strong>Windows</strong> — NSIS installer for Windows 10/11</li>
+        </ul>
+        <p className="text-text-med leading-relaxed">
+          Download links are available right from the site header and the homepage hero.
+          The hero button auto-detects your platform so you get the right build in one click.
+        </p>
+
+        <h2 className="text-2xl font-bold text-text-hi mt-8 mb-4">Multi-Miner Threading</h2>
+        <p className="text-text-med leading-relaxed">
+          One of the biggest features in this release is multi-miner support. You can run
+          multiple independent miners inside the same app, each with its own wallet address.
+          Every miner tab spins up its own Geth instance and syncs its own chain data, so
+          mining rewards go exactly where you want them.
+        </p>
+        <ul className="text-text-med space-y-2">
+          <li>• <strong>Tabbed Interface:</strong> Switch between miners with a single click</li>
+          <li>• <strong>Independent Wallets:</strong> Assign a different wallet to each miner</li>
+          <li>• <strong>Parallel Mining:</strong> All miners run simultaneously</li>
+        </ul>
+
+        <h2 className="text-2xl font-bold text-text-hi mt-8 mb-4">One-Click Setup</h2>
+        <p className="text-text-med leading-relaxed">
+          When you open a new miner tab for the first time, the app walks you through a
+          short setup flow: enter or generate a wallet address, and the app initializes the
+          genesis block and starts syncing automatically. No command-line knowledge required.
+        </p>
+
+        <h2 className="text-2xl font-bold text-text-hi mt-8 mb-4">Real-Time Monitoring</h2>
+        <p className="text-text-med leading-relaxed">
+          The dashboard shows live stats for each miner:
+        </p>
+        <ul className="text-text-med space-y-2">
+          <li>• <strong>Hashrate:</strong> Adaptive units (H/s, KH/s, MH/s) with a log-based
+            estimation fallback when the RPC reports zero</li>
+          <li>• <strong>Balance:</strong> Current wallet balance in MARS</li>
+          <li>• <strong>Peers:</strong> Number of connected network peers</li>
+          <li>• <strong>Sync Status:</strong> Current and highest block numbers</li>
+          <li>• <strong>Logs:</strong> Scrollable console output from the Geth process</li>
+        </ul>
+
+        <div className="bg-mars-950/50 border border-mars-500/20 rounded-lg p-6 my-8">
+          <h3 className="text-lg font-semibold text-mars-300 mb-2">System Requirements</h3>
+          <ul className="text-text-med text-sm space-y-1">
+            <li>• macOS 11.0+ or Windows 10/11</li>
+            <li>• 8 GB RAM minimum (16 GB recommended for multiple miners)</li>
+            <li>• ~2 GB free disk space per miner for chain data</li>
+            <li>• Stable internet connection</li>
+          </ul>
+        </div>
+
+        <h2 className="text-2xl font-bold text-text-hi mt-8 mb-4">Get Started</h2>
+        <p className="text-text-med leading-relaxed">
+          Head to the homepage and click <strong>Download Miner</strong> — the site will
+          detect your platform automatically. Or use the dropdown in the navigation bar to
+          pick a specific build. Happy mining!
+        </p>
+      </div>
+    ),
+  },
   "solana-bridge-paused": {
     title: "Solana Bridge Paused",
     date: "2025-11-01",
@@ -193,6 +273,7 @@ const tagColors: Record<string, string> = {
   grants: "bg-emerald-500/20 text-emerald-300",
   community: "bg-pink-500/20 text-pink-300",
   development: "bg-indigo-500/20 text-indigo-300",
+  windows: "bg-sky-500/20 text-sky-300",
 }
 
 interface UpdatePageProps {
