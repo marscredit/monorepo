@@ -1,0 +1,12 @@
+# Build from repo root: docker build -f Dockerfile.pmmLatoken .
+FROM python:3.12-slim
+
+WORKDIR /app
+
+COPY pmm-latoken/requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY pmm-latoken/src ./src
+COPY pmm-latoken/tests ./tests
+
+CMD ["python", "-m", "src.main"]

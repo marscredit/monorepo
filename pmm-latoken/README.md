@@ -22,7 +22,7 @@ The bot **does not** trade with itself (wash trading). It places passive limit o
 ## Setup
 
 ```bash
-cd pmm
+cd pmm-latoken
 
 # Install dependencies
 pip install -r requirements.txt
@@ -34,7 +34,7 @@ cp .env.example .env
 
 ## Configuration
 
-Edit `pmm/.env`:
+Edit `pmm-latoken/.env`:
 
 | Variable | Default | Description |
 |---|---|---|
@@ -56,11 +56,11 @@ Edit `pmm/.env`:
 ## Running
 
 ```bash
-cd pmm
+cd pmm-latoken
 python3 -m src.main
 ```
 
-Logs go to both stdout (JSON) and `pmm/pmm.log`.
+Logs go to both stdout (JSON) and `pmm-latoken/pmm.log`.
 
 To stop gracefully, press Ctrl+C — the bot will cancel all open orders before exiting.
 
@@ -73,14 +73,24 @@ A round-trip trade costs 1.18% in fees. The default spread of 3% total (1.5% eac
 ## Tests
 
 ```bash
-cd pmm
+cd pmm-latoken
 python3 -m pytest tests/ -v
 ```
+
+## Docker (Railway)
+
+Build from repo root using the root Dockerfile:
+
+```bash
+docker build -f Dockerfile.pmmLatoken .
+```
+
+Set environment variables in Railway's dashboard instead of a `.env` file.
 
 ## Architecture
 
 ```
-pmm/
+pmm-latoken/
   src/
     main.py            # Entry point
     config.py          # Loads .env configuration
