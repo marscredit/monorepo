@@ -1,6 +1,6 @@
 export const site = {
   name: "Mars Credit",
-  url: "https://marscredit.org",
+  url: "https://marscredit.xyz",
   twitter: "marscredit",
   description: "Mineable, EVM-compatible Layer‑1 tuned for the Red Planet.",
 } as const
@@ -14,12 +14,12 @@ export const network = {
     process.env.MARS_RPC_PRIMARY!,
     process.env.MARS_RPC_FALLBACK!,
   ].filter(Boolean),
-  explorer: process.env.MARS_EXPLORER_URL ?? "https://explorer.marscredit.org",
+  explorer: process.env.MARS_EXPLORER_URL ?? "https://explorer.marscredit.xyz",
 } as const
 
 export const links = {
   github: "https://github.com/marscredit",
-  docs: "https://docs.marscredit.org",
+  docs: "https://docs.marscredit.xyz",
   discord: "https://discord.gg/57bg77dCV8",
   twitter: "https://x.com/marscredit",
   telegram: "https://t.me/marscreditxyz",

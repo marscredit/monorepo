@@ -1,0 +1,3 @@
+latoken-api-v2-python-client
+python-dotenv
+requests

@@ -189,7 +189,7 @@ const updates: Record<string, {
           Bridging your MARS tokens to Solana is straightforward:
         </p>
         <ol className="text-text-med space-y-2">
-          <li>1. Visit our bridge interface at <code>bridge.marscredit.org</code></li>
+          <li>1. Visit our bridge interface at <code>bridge.marscredit.xyz</code></li>
           <li>2. Connect your Mars Credit and Solana wallets</li>
           <li>3. Specify the amount of MARS to bridge</li>
           <li>4. Confirm the transaction and wait for confirmation</li>
@@ -389,7 +389,7 @@ export default function UpdatePage({ params }: UpdatePageProps) {
               <div className="flex space-x-2">
                 <Button variant="ghost" size="sm" asChild>
                   <a 
-                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out: ${update.title}`)}&url=${encodeURIComponent(`https://marscredit.org/updates/${slug}`)}`}
+                    href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out: ${update.title}`)}&url=${encodeURIComponent(`https://marscredit.xyz/updates/${slug}`)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
