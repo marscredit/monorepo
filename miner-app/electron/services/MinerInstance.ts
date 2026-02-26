@@ -51,8 +51,10 @@ export class MinerInstance extends EventEmitter {
   private process: ChildProcess | null = null;
   private healthCheckTimer: ReturnType<typeof setInterval> | null = null;
   private healthFailures = 0;
-  private readonly maxHealthFailures = 3;
-  private readonly healthCheckIntervalMs = 5000;
+  private readonly maxHealthFailures = 6;
+  private readonly healthCheckIntervalMs = 10_000;
+  private readonly startupGraceMs = 60_000;
+  private startedAt = 0;
 
   constructor(config: MinerInstanceConfig) {
     super();
@@ -68,7 +70,7 @@ export class MinerInstance extends EventEmitter {
   }
 
   get rpcUrl(): string {
-    return `http://localhost:${this.httpPort}`;
+    return `http://127.0.0.1:${this.httpPort}`;
   }
 
   get isRunning(): boolean {
@@ -102,10 +104,10 @@ export class MinerInstance extends EventEmitter {
       '--keystore', keystoreDir,
       '--syncmode', 'full',
       '--gcmode', 'full',
-      '--http', '--http.addr', 'localhost', '--http.port', String(http),
+      '--http', '--http.addr', '127.0.0.1', '--http.port', String(http),
       '--http.api', 'personal,eth,net,web3,miner,admin,debug',
       '--http.vhosts', '*', '--http.corsdomain', '*',
-      '--ws', '--ws.addr', 'localhost', '--ws.port', String(ws),
+      '--ws', '--ws.addr', '127.0.0.1', '--ws.port', String(ws),
       '--ws.api', 'personal,eth,net,web3,miner,admin,debug',
       '--port', String(p2p),
       '--networkid', String(NETWORK_ID),
@@ -183,13 +185,17 @@ export class MinerInstance extends EventEmitter {
 
   private startHealthCheck(): void {
     this.healthFailures = 0;
-    this.healthCheckTimer = setInterval(() => {
-      this.checkHealth();
-    }, this.healthCheckIntervalMs);
+    this.startedAt = Date.now();
+    this.healthCheckTimer = setTimeout(() => {
+      this.healthCheckTimer = setInterval(() => {
+        this.checkHealth();
+      }, this.healthCheckIntervalMs);
+    }, this.startupGraceMs);
   }
 
   private stopHealthCheck(): void {
     if (this.healthCheckTimer) {
+      clearTimeout(this.healthCheckTimer);
       clearInterval(this.healthCheckTimer);
       this.healthCheckTimer = null;
     }

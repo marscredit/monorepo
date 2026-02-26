@@ -347,6 +347,12 @@ struct ContentView: View {
                 .font(.gunship(size: 16))
                 .foregroundColor(.white)
             HStack {
+                Text("Hashrate:")
+                    .font(.caption).foregroundColor(.gray)
+                Text(HashrateFormatter.format(miningService.estimatedHashrate))
+                    .font(.caption).foregroundColor(miningService.estimatedHashrate > 0 ? .green : .yellow)
+            }
+            HStack {
                 Text("Network Block:")
                     .font(.caption).foregroundColor(.gray)
                 Text("\(miningService.networkStatus.highestBlock)")

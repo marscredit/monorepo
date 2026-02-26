@@ -69,6 +69,31 @@ export function setWindowBounds(bounds: AppConfig['windowBounds']): void {
   store.set('windowBounds', bounds);
 }
 
+export function getMinerTabConfig(minerIndex: number): MinerTabConfig | undefined {
+  const tabs = getMinerTabs();
+  return tabs.find((t) => t.minerIndex === minerIndex);
+}
+
+export function upsertMinerTab(config: Partial<MinerTabConfig> & { minerIndex: number }): void {
+  const tabs = getMinerTabs();
+  const idx = tabs.findIndex((t) => t.minerIndex === config.minerIndex);
+  if (idx >= 0) {
+    tabs[idx] = { ...tabs[idx], ...config };
+  } else {
+    tabs.push({ minerThreads: 1, cacheMB: 4096, ...config });
+  }
+  setMinerTabs(tabs);
+}
+
+export function setMinerTabWalletAddress(minerIndex: number, address: string): void {
+  upsertMinerTab({ minerIndex, walletAddress: address });
+}
+
+export function removeMinerTab(minerIndex: number): void {
+  const tabs = getMinerTabs().filter((t) => t.minerIndex !== minerIndex);
+  setMinerTabs(tabs);
+}
+
 export function getTheme(): 'dark' | 'light' {
   return store.get('theme', 'dark');
 }

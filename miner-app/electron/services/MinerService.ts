@@ -92,13 +92,19 @@ export class MinerService extends EventEmitter {
     }
   }
 
-  /** Start a miner by index. */
+  /** Start a miner by index. Stops stale instance if one exists. */
   async startMiner(minerIndex: number, config?: Partial<MinerInstanceConfig>): Promise<void> {
-    const inst = this.getOrCreateInstance(minerIndex, config);
-    if (inst.isRunning) {
-      logger.info('Miner already running', { minerIndex });
+    const existing = this.instances.get(minerIndex);
+    if (existing?.isRunning) {
+      logger.info('Miner already running, skipping start', { minerIndex });
       return;
     }
+    if (existing && !existing.isRunning) {
+      existing.removeAllListeners();
+      this.instances.delete(minerIndex);
+    }
+
+    const inst = this.getOrCreateInstance(minerIndex, config);
     await inst.start();
     const cached = this.configCache.get(minerIndex) ?? { minerThreads: 1, cacheMB: 4096 };
     this.emit('minerState', minerIndex, {

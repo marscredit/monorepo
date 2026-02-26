@@ -51,6 +51,10 @@ export interface ElectronAPI {
     setHasCompletedOnboarding: (value: boolean) => Promise<void>;
     getMinerTabs: () => Promise<Array<{ minerIndex: number; walletAddress?: string; minerThreads: number; cacheMB: number }>>;
     setMinerTabs: (tabs: Array<{ minerIndex: number; walletAddress?: string; minerThreads: number; cacheMB: number }>) => Promise<void>;
+    getMinerTabConfig: (minerIndex: number) => Promise<{ minerIndex: number; walletAddress?: string; minerThreads: number; cacheMB: number } | undefined>;
+    setMinerTabWalletAddress: (minerIndex: number, address: string) => Promise<void>;
+    upsertMinerTab: (config: { minerIndex: number; walletAddress?: string; minerThreads?: number; cacheMB?: number }) => Promise<void>;
+    removeMinerTab: (minerIndex: number) => Promise<void>;
     getGethPath: () => Promise<string | undefined>;
     getGethVersion: () => Promise<string | undefined>;
   };

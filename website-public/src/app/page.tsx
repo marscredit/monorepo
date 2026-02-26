@@ -10,6 +10,7 @@ import { FeatureCard } from "@/components/feature-card"
 import { BoomerangVideo } from "@/components/boomerang-video"
 import { LiveBlockTicker } from "@/components/live-block-ticker"
 import { links } from "@/lib/config"
+import { getMinerDownloadUrl } from "@/lib/download"
 import { 
   Zap, 
   Shield, 
@@ -67,6 +68,14 @@ const features = [
 
 export default function HomePage() {
   const [block, setBlock] = useState<number | null>(null)
+  const [downloadUrl, setDownloadUrl] = useState<string>("#")
+  const [downloadLabel, setDownloadLabel] = useState<string>("Download Miner")
+
+  useEffect(() => {
+    const dl = getMinerDownloadUrl()
+    setDownloadUrl(dl.url)
+    setDownloadLabel(`Download for ${dl.label}`)
+  }, [])
 
   useEffect(() => {
     fetch("/api/network")
@@ -136,13 +145,13 @@ export default function HomePage() {
               transition={{ duration: 0.8, delay: 0.4 }}
               className="flex flex-col sm:flex-row gap-4 justify-center items-center"
             >
-              <Button size="lg" asChild>
-                <a href={links.github} target="_blank" rel="noopener noreferrer">
-                  <Github className="mr-2 h-5 w-5" />
-                  View on GitHub
+              <Button size="lg" asChild className="border border-white/40 bg-transparent text-white hover:bg-white/10 hover:border-white/60 shadow-none">
+                <a href={downloadUrl}>
+                  <Download className="mr-2 h-5 w-5" />
+                  {downloadLabel}
                 </a>
               </Button>
-              <Button variant="outline" size="lg" asChild>
+              <Button size="lg" asChild className="border border-white/40 bg-transparent text-white hover:bg-white/10 hover:border-white/60 shadow-none">
                 <a href={links.blockscan} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="mr-2 h-5 w-5" />
                   Explore Blockscan

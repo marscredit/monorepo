@@ -51,8 +51,8 @@ export function LogViewer({
   }, [filtered.length, autoScroll]);
 
   const levelColors: Record<LogLevel, string> = {
-    all: 'text-gray-300',
-    info: 'text-gray-300',
+    all: 'text-text-med',
+    info: 'text-text-med',
     warn: 'text-amber-400',
     error: 'text-red-400',
     mining: 'text-green-400',
@@ -60,21 +60,26 @@ export function LogViewer({
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex gap-2 py-1 border-b border-gray-700">
+    <div className="flex flex-col h-full min-h-0">
+      <div className="flex gap-1.5 py-1.5 border-b border-mars-900/50">
         {(['all', 'info', 'warn', 'error', 'mining', 'network'] as LogLevel[]).map((level) => (
           <button
             key={level}
             type="button"
             onClick={() => setFilterLevel(level)}
-            className={`text-xs px-2 py-1 rounded ${filterLevel === level ? 'bg-mars-red' : 'bg-mars-dark'}`}
+            className={`text-xs px-2.5 py-1 rounded-xl transition-colors ${
+              filterLevel === level
+                ? 'bg-mars-400 text-white'
+                : 'bg-bg-muted text-text-lo hover:text-text-med'
+            }`}
           >
             {level}
           </button>
         ))}
-        <label className="ml-auto flex items-center gap-1 text-xs">
+        <label className="ml-auto flex items-center gap-1.5 text-xs text-text-lo select-none cursor-pointer">
           <input
             type="checkbox"
+            className="mars-check"
             checked={autoScroll}
             onChange={(e) => setAutoScroll(e.target.checked)}
           />
@@ -83,13 +88,12 @@ export function LogViewer({
       </div>
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto font-mono text-xs p-2 bg-black/50 mt-1 rounded"
-        style={{ minHeight: 120 }}
+        className="flex-1 overflow-y-auto font-mono text-xs p-2 bg-black/40 mt-1 rounded-xl min-h-0"
       >
         {filtered.map((item) => (
           <div
             key={item.id}
-            className={`${levelColors[getLogLevel(item.line)]} ${item.source === 'stderr' ? 'text-red-300' : ''}`}
+            className={`${levelColors[getLogLevel(item.line)]} ${item.source === 'stderr' ? 'text-red-300' : ''} leading-5`}
           >
             {item.line}
           </div>

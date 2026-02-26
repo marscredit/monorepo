@@ -13,14 +13,14 @@ export function StatusBar() {
   }, []);
 
   return (
-    <div className="flex items-center justify-between px-4 py-2 bg-mars-dark border-t border-gray-800 text-xs text-gray-400">
+    <div className="flex items-center justify-between px-4 py-2 bg-bg-panel border-t border-mars-900/30 text-xs text-text-lo">
       <span>
         Network: {remoteConnected === true ? (
           <span className="text-green-400">Connected</span>
         ) : remoteConnected === false ? (
           <span className="text-amber-400">Checking...</span>
         ) : (
-          <span className="text-gray-500">—</span>
+          <span className="text-text-lo">—</span>
         )}
       </span>
       <span>Mars Credit Miner {version ? `v${version}` : ''}</span>

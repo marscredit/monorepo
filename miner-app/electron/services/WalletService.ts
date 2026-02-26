@@ -8,6 +8,7 @@ import * as path from 'path';
 import { Wallet } from 'ethers';
 import { getMarsCreditDir, getWalletEncPath, getMinerKeystoreDir } from '../utils/paths';
 import { logger } from '../utils/logger';
+import { getMinerTabConfig } from './ConfigStore';
 
 export type WalletMode = 'full' | 'address_only';
 
@@ -86,8 +87,12 @@ export function setAddressOnly(address: string): void {
   logger.info('Address-only mining address set', { address });
 }
 
-/** Get stored mining address (from address-only file or first keystore in a miner). */
+/** Get stored mining address: per-miner config first, then global file, then keystore. */
 export function getStoredMiningAddress(minerIndex?: number): string | null {
+  if (minerIndex != null) {
+    const tabConfig = getMinerTabConfig(minerIndex);
+    if (tabConfig?.walletAddress) return tabConfig.walletAddress;
+  }
   const dir = getMarsCreditDir();
   const addressFile = path.join(dir, 'mining_address.txt');
   if (fs.existsSync(addressFile)) {

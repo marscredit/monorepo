@@ -67,6 +67,12 @@ const config = {
   getMinerTabs: () => ipcRenderer.invoke('config:getMinerTabs'),
   setMinerTabs: (tabs: Array<{ minerIndex: number; walletAddress?: string; minerThreads: number; cacheMB: number }>) =>
     ipcRenderer.invoke('config:setMinerTabs', tabs),
+  getMinerTabConfig: (minerIndex: number) => ipcRenderer.invoke('config:getMinerTabConfig', minerIndex),
+  setMinerTabWalletAddress: (minerIndex: number, address: string) =>
+    ipcRenderer.invoke('config:setMinerTabWalletAddress', minerIndex, address),
+  upsertMinerTab: (config: { minerIndex: number; walletAddress?: string; minerThreads?: number; cacheMB?: number }) =>
+    ipcRenderer.invoke('config:upsertMinerTab', config),
+  removeMinerTab: (minerIndex: number) => ipcRenderer.invoke('config:removeMinerTab', minerIndex),
   getGethPath: () => ipcRenderer.invoke('config:getGethPath'),
   getGethVersion: () => ipcRenderer.invoke('config:getGethVersion'),
 };

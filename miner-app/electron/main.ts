@@ -3,6 +3,7 @@ import path from 'path';
 import {
   isGethAvailable,
   downloadGeth,
+  supportsPoWMining,
   getGethPath as getGethPathUtil,
   type GethDownloadProgress,
 } from './services/GethManager';
@@ -19,11 +20,16 @@ const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
 
 function createWindow() {
   const bounds = ConfigStore.getWindowBounds();
+  const isMacOS = process.platform === 'darwin';
+
   mainWindow = new BrowserWindow({
     width: bounds?.width ?? 1200,
     height: bounds?.height ?? 800,
     x: bounds?.x,
     y: bounds?.y,
+    titleBarStyle: isMacOS ? 'hiddenInset' : 'default',
+    ...(isMacOS ? { trafficLightPosition: { x: 12, y: 12 } } : {}),
+    backgroundColor: '#0b0b0e',
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
@@ -41,8 +47,8 @@ function createWindow() {
   });
 
   if (isDev) {
-    mainWindow.loadURL('http://localhost:5173');
-    mainWindow.webContents.openDevTools();
+    const devPort = process.env.VITE_DEV_PORT || '5173';
+    mainWindow.loadURL(`http://localhost:${devPort}`);
   } else {
     mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
   }
@@ -82,8 +88,21 @@ function registerIpc() {
   ipcMain.handle('geth:getPath', () => getGethPathUtil());
 
   ipcMain.handle('miner:start', async (_, minerIndex: number, config?: { minerThreads?: number; cacheMB?: number; etherbase?: string }) => {
-    const gethPath = ConfigStore.getGethPath() || getGethPathUtil();
-    minerService.setGethPath(gethPath);
+    let gethPath = ConfigStore.getGethPath() || getGethPathUtil();
+
+    const available = await isGethAvailable(gethPath);
+    if (!available.ok) {
+      const result = await downloadGeth((p: GethDownloadProgress) => {
+        send('geth:downloadProgress', p);
+      });
+      gethPath = result.path;
+      minerService.setGethPath(gethPath);
+      ConfigStore.setGethPath(gethPath);
+      ConfigStore.setGethVersion(result.version);
+    } else {
+      minerService.setGethPath(available.path);
+    }
+
     await minerService.startMiner(minerIndex, config);
     return minerService.getMinerState(minerIndex);
   });
@@ -147,6 +166,10 @@ function registerIpc() {
   ipcMain.handle('config:setHasCompletedOnboarding', (_, value: boolean) => ConfigStore.setHasCompletedOnboarding(value));
   ipcMain.handle('config:getMinerTabs', () => ConfigStore.getMinerTabs());
   ipcMain.handle('config:setMinerTabs', (_, tabs: ConfigStore.MinerTabConfig[]) => ConfigStore.setMinerTabs(tabs));
+  ipcMain.handle('config:getMinerTabConfig', (_, minerIndex: number) => ConfigStore.getMinerTabConfig(minerIndex));
+  ipcMain.handle('config:setMinerTabWalletAddress', (_, minerIndex: number, address: string) => ConfigStore.setMinerTabWalletAddress(minerIndex, address));
+  ipcMain.handle('config:upsertMinerTab', (_, config: ConfigStore.MinerTabConfig) => ConfigStore.upsertMinerTab(config));
+  ipcMain.handle('config:removeMinerTab', (_, minerIndex: number) => ConfigStore.removeMinerTab(minerIndex));
   ipcMain.handle('config:getGethPath', () => ConfigStore.getGethPath());
   ipcMain.handle('config:getGethVersion', () => ConfigStore.getGethVersion());
 

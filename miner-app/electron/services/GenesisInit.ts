@@ -1,6 +1,7 @@
 /**
  * Genesis initialization for Mars Credit chain.
  * Runs geth init with mars_credit_genesis.json when a miner data dir is first created.
+ * Detects stale/wrong genesis (e.g. Ethereum mainnet ChainID:1) and re-initializes.
  */
 
 import * as fs from 'fs';
@@ -11,6 +12,8 @@ import { getMinerDataDir } from '../utils/paths';
 import { logger } from '../utils/logger';
 
 const CHAINDATA_DIR = 'geth/chaindata';
+const GENESIS_MARKER = '.mars-genesis-ok';
+const MARS_CHAIN_ID = 110110;
 
 /** Resolve path to genesis.json (dev: miner-app/resources, packaged: resources next to app). */
 export function getGenesisPath(): string {
@@ -25,7 +28,16 @@ export function getGenesisPath(): string {
   throw new Error('genesis.json not found in resources');
 }
 
-/** Ensure miner data dir exists and run geth init if chaindata does not exist. */
+/** Wipe the geth subdirectory so genesis can be re-applied cleanly. */
+function wipeGethData(dataDir: string): void {
+  const gethDir = path.join(dataDir, 'geth');
+  if (fs.existsSync(gethDir)) {
+    logger.info('Wiping stale geth data for re-initialization', { gethDir });
+    fs.rmSync(gethDir, { recursive: true, force: true });
+  }
+}
+
+/** Ensure miner data dir exists and run geth init if chaindata does not exist or has wrong genesis. */
 export function initMinerDataDir(
   gethBinaryPath: string,
   minerIndex: number,
@@ -33,10 +45,16 @@ export function initMinerDataDir(
 ): void {
   const dataDir = getMinerDataDir(minerIndex);
   const chaindataDir = path.join(dataDir, CHAINDATA_DIR);
+  const markerPath = path.join(dataDir, GENESIS_MARKER);
 
-  if (fs.existsSync(chaindataDir)) {
-    logger.debug('Chaindata exists, skipping genesis init', { dataDir });
+  if (fs.existsSync(chaindataDir) && fs.existsSync(markerPath)) {
+    logger.debug('Chaindata exists with valid Mars genesis marker, skipping init', { dataDir });
     return;
+  }
+
+  if (fs.existsSync(chaindataDir) && !fs.existsSync(markerPath)) {
+    logger.warn('Chaindata exists but Mars genesis marker missing -- wiping for re-init', { dataDir });
+    wipeGethData(dataDir);
   }
 
   const genesis = genesisPath || getGenesisPath();
@@ -54,6 +72,7 @@ export function initMinerDataDir(
       stdio: 'pipe',
       maxBuffer: 10 * 1024 * 1024,
     });
+    fs.writeFileSync(markerPath, JSON.stringify({ chainId: MARS_CHAIN_ID, initAt: new Date().toISOString() }));
     logger.info('Genesis initialization successful', { dataDir });
   } catch (e) {
     const err = e as Error & { stdout?: Buffer; stderr?: Buffer };

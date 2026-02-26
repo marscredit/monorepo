@@ -22,7 +22,7 @@ function App() {
 
   if (!ready) {
     return (
-      <div className="min-h-screen bg-mars-black text-white flex items-center justify-center">
+      <div className="h-screen bg-bg text-white flex items-center justify-center">
         <p>Loading...</p>
       </div>
     );
@@ -39,16 +39,25 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-mars-black text-white flex flex-col">
-      <header className="border-b border-gray-800 px-4 py-2">
-        <h1 className="text-xl font-bold text-mars-red">Mars Credit Miner</h1>
+    <div className="h-screen bg-bg text-white flex flex-col overflow-hidden">
+      {/* Header / drag region for frameless window */}
+      <header
+        className="border-b border-mars-900/30 px-4 py-2 pl-20 flex items-center shrink-0"
+        style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
+      >
+        <h1
+          className="text-xl font-bold text-mars-400"
+          style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+        >
+          Mars Credit Miner
+        </h1>
       </header>
       <TabBar />
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 min-h-0 overflow-hidden">
         {activeMinerIndex != null ? (
           <MinerTab minerIndex={activeMinerIndex} />
         ) : (
-          <div className="p-8 text-gray-400">Select or add a miner tab.</div>
+          <div className="p-8 text-text-lo">Select or add a miner tab.</div>
         )}
       </main>
       <StatusBar />

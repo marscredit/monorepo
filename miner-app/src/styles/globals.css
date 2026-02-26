@@ -1,14 +1,82 @@
+@import url('https://fonts.googleapis.com/css2?family=Stack+Sans+Notch:wght@400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg: #0b0b0e;
+  --panel: #121218;
+  --muted: #1a1a22;
+  --mars-400: #cc0000;
+  --mars-300: #ff4433;
+  --text-hi: #ffffff;
+  --text-med: #c9c9d1;
+  --text-lo: #9a9aa3;
+}
+
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: 'Stack Sans Notch', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: var(--bg);
+  color: var(--text-hi);
 }
 
 #root {
-  min-height: 100vh;
+  height: 100vh;
+}
+
+/* Custom checkbox styling for brand consistency */
+input[type="checkbox"].mars-check {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid #555;
+  border-radius: 4px;
+  background: #1a1a22;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+}
+
+input[type="checkbox"].mars-check:checked {
+  background: #cc0000;
+  border-color: #cc0000;
+}
+
+input[type="checkbox"].mars-check:checked::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 5px;
+  height: 9px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+input[type="checkbox"].mars-check:hover {
+  border-color: #cc0000;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
