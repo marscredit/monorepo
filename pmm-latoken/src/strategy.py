@@ -5,6 +5,7 @@ spreads based on inventory and refreshing on a configurable interval.
 """
 
 import logging
+import random
 import signal
 import time as time_mod
 from typing import List, Optional
@@ -31,6 +32,7 @@ class PMMStrategy:
         self._pnl = PnLTracker()
         self._last_mid_price: float = 0.0
         self._cycle_count = 0
+        self._last_volume_trade_time: float = 0.0
 
     def start(self) -> None:
         """Initialize and enter the main trading loop."""
@@ -118,6 +120,8 @@ class PMMStrategy:
             if result.success:
                 self._active_order_ids.append(result.order_id)
 
+        self._maybe_volume_trade(mid_price, inventory)
+
         if self._cycle_count % 10 == 0:
             self._log_status(inventory, mid_price, bid_spread, ask_spread)
 
@@ -176,6 +180,49 @@ class PMMStrategy:
             return False
 
         return True
+
+    def _maybe_volume_trade(self, mid_price: float, inventory: InventoryState) -> None:
+        """Periodically execute a small trade to generate visible volume."""
+        interval = self._config.volume_trade_interval_seconds
+        if interval <= 0 or self._config.volume_trade_amount_usdt <= 0:
+            return
+
+        now = time_mod.time()
+        if now - self._last_volume_trade_time < interval:
+            return
+
+        self._last_volume_trade_time = now
+        amount_usdt = self._config.volume_trade_amount_usdt
+
+        jitter = random.uniform(0.8, 1.2)
+        amount_usdt *= jitter
+
+        book = self._client.get_orderbook(limit=5)
+
+        if random.random() < 0.5 and book.best_ask and inventory.quote_available > amount_usdt:
+            qty = amount_usdt / book.best_ask
+            qty = round(qty, self._client.quantity_decimals)
+            if qty > 0:
+                result = self._client.place_limit_order("BUY", book.best_ask, qty)
+                log_event(
+                    logger, "INFO", "Volume trade BUY",
+                    price=round(book.best_ask, 8),
+                    quantity=round(qty, 4),
+                    cost_usdt=round(book.best_ask * qty, 4),
+                    status=result.status,
+                )
+        elif book.best_bid and inventory.base_available * mid_price > amount_usdt:
+            qty = amount_usdt / book.best_bid
+            qty = round(qty, self._client.quantity_decimals)
+            if qty > 0:
+                result = self._client.place_limit_order("SELL", book.best_bid, qty)
+                log_event(
+                    logger, "INFO", "Volume trade SELL",
+                    price=round(book.best_bid, 8),
+                    quantity=round(qty, 4),
+                    cost_usdt=round(book.best_bid * qty, 4),
+                    status=result.status,
+                )
 
     def _cancel_existing_orders(self) -> None:
         try:
