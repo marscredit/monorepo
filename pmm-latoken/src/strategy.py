@@ -194,7 +194,7 @@ class PMMStrategy:
             quantity=round(qty, 4),
             order_id=result.order_id,
             status=result.status,
-            message=result.message,
+            detail=result.message,
         )
 
     def _log_status(self, inventory: InventoryState, mid_price: float, bid_spread: float, ask_spread: float) -> None:
