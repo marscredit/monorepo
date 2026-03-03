@@ -100,6 +100,11 @@ class PMMStrategy:
         bid_price = mid_price * (1 - bid_spread)
         ask_price = mid_price * (1 + ask_spread)
 
+        if self._config.min_sell_price > 0:
+            ask_price = max(ask_price, self._config.min_sell_price)
+        if self._config.min_buy_price > 0:
+            bid_price = min(bid_price, self._config.min_buy_price)
+
         buy_qty, sell_qty = compute_order_sizes(
             base_amount=self._config.order_amount,
             inventory_state=inventory,
@@ -199,7 +204,14 @@ class PMMStrategy:
 
         book = self._client.get_orderbook(limit=5)
 
-        if random.random() < 0.5 and book.best_ask and inventory.quote_available > amount_usdt:
+        min_sell = self._config.min_sell_price
+
+        can_buy = (book.best_ask and inventory.quote_available > amount_usdt)
+        can_sell = (book.best_bid and inventory.base_available * mid_price > amount_usdt
+                    and (min_sell <= 0 or book.best_bid >= min_sell))
+
+        do_buy = random.random() < 0.5
+        if do_buy and can_buy:
             qty = amount_usdt / book.best_ask
             qty = round(qty, self._client.quantity_decimals)
             if qty > 0:
@@ -211,7 +223,7 @@ class PMMStrategy:
                     cost_usdt=round(book.best_ask * qty, 4),
                     status=result.status,
                 )
-        elif book.best_bid and inventory.base_available * mid_price > amount_usdt:
+        elif can_sell:
             qty = amount_usdt / book.best_bid
             qty = round(qty, self._client.quantity_decimals)
             if qty > 0:
@@ -221,6 +233,18 @@ class PMMStrategy:
                     price=round(book.best_bid, 8),
                     quantity=round(qty, 4),
                     cost_usdt=round(book.best_bid * qty, 4),
+                    status=result.status,
+                )
+        elif can_buy:
+            qty = amount_usdt / book.best_ask
+            qty = round(qty, self._client.quantity_decimals)
+            if qty > 0:
+                result = self._client.place_limit_order("BUY", book.best_ask, qty)
+                log_event(
+                    logger, "INFO", "Volume trade BUY",
+                    price=round(book.best_ask, 8),
+                    quantity=round(qty, 4),
+                    cost_usdt=round(book.best_ask * qty, 4),
                     status=result.status,
                 )
 

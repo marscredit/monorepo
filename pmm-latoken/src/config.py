@@ -28,6 +28,9 @@ class Config:
     daily_loss_limit_usdt: float
     seed_price: float
 
+    min_sell_price: float
+    min_buy_price: float
+
     volume_trade_interval_seconds: int
     volume_trade_amount_usdt: float
 
@@ -69,6 +72,8 @@ def load_config() -> Config:
         max_position_usdt=float(os.getenv("MAX_POSITION_USDT", "5000")),
         daily_loss_limit_usdt=float(os.getenv("DAILY_LOSS_LIMIT_USDT", "50")),
         seed_price=float(os.getenv("SEED_PRICE", "0")),
+        min_sell_price=float(os.getenv("MIN_SELL_PRICE", "0")),
+        min_buy_price=float(os.getenv("MIN_BUY_PRICE", "0")),
         volume_trade_interval_seconds=int(os.getenv("VOLUME_TRADE_INTERVAL_SECONDS", "1800")),
         volume_trade_amount_usdt=float(os.getenv("VOLUME_TRADE_AMOUNT_USDT", "20")),
         log_level=os.getenv("LOG_LEVEL", "INFO"),
