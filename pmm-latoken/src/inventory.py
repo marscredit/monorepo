@@ -72,7 +72,14 @@ class PnLTracker:
 
             self._processed_trade_ids.add(trade_id)
 
-            side = (trade.get("side") or trade.get("direction") or "").upper()
+            raw_side = (trade.get("side") or trade.get("direction") or "").upper()
+            if "SELL" in raw_side:
+                side = "SELL"
+            elif "BUY" in raw_side:
+                side = "BUY"
+            else:
+                side = ""
+
             price = float(trade.get("price", 0))
             quantity = float(trade.get("quantity", 0))
             cost = float(trade.get("cost", 0)) or (price * quantity)

@@ -115,6 +115,15 @@ class TestPnLTracker(unittest.TestCase):
         ])
         self.assertAlmostEqual(tracker.get_realized_pnl(), 0.5, places=2)
 
+    def test_latoken_trade_direction_format(self):
+        tracker = PnLTracker()
+        tracker.process_trades([
+            {"id": "t1", "direction": "TRADE_DIRECTION_BUY", "price": "0.004", "quantity": "1000", "cost": "4.0", "fee": "0.01"},
+            {"id": "t2", "direction": "TRADE_DIRECTION_SELL", "price": "0.005", "quantity": "1000", "cost": "5.0", "fee": "0.01"},
+        ])
+        self.assertAlmostEqual(tracker.get_realized_pnl(), 0.98, places=2)
+        self.assertEqual(tracker.trade_count, 2)
+
     def test_cost_computed_from_price_and_quantity(self):
         tracker = PnLTracker()
         tracker.process_trades([
