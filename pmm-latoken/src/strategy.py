@@ -160,6 +160,14 @@ class PMMStrategy:
             mid_price=mid_price,
         )
 
+    def _update_realized_pnl(self) -> None:
+        """Fetch recent trades from the exchange and feed them to the PnL tracker."""
+        try:
+            trades = self._client.get_user_trades(limit=50)
+            self._pnl.process_trades(trades)
+        except Exception:
+            logger.exception("Failed to fetch user trades for P&L tracking")
+
     def _check_safety(self, inventory: InventoryState, mid_price: float) -> bool:
         if inventory.total_value_in_quote > self._config.max_position_usdt:
             log_event(
@@ -171,14 +179,17 @@ class PMMStrategy:
             )
             return False
 
-        daily_pnl = self._pnl.estimate_daily_pnl(inventory.total_value_in_quote)
-        if daily_pnl < -self._config.daily_loss_limit_usdt:
+        self._update_realized_pnl()
+        realized_pnl = self._pnl.get_realized_pnl()
+        if realized_pnl < -self._config.daily_loss_limit_usdt:
             log_event(
                 logger,
                 "ERROR",
                 "Daily loss limit hit, stopping strategy",
-                daily_pnl=round(daily_pnl, 2),
+                realized_pnl=round(realized_pnl, 2),
                 limit=self._config.daily_loss_limit_usdt,
+                trade_count=self._pnl.trade_count,
+                fees=round(self._pnl.realized_fees_quote, 4),
             )
             self._cancel_existing_orders()
             self._running = False
@@ -269,7 +280,7 @@ class PMMStrategy:
         )
 
     def _log_status(self, inventory: InventoryState, mid_price: float, bid_spread: float, ask_spread: float) -> None:
-        daily_pnl = self._pnl.estimate_daily_pnl(inventory.total_value_in_quote)
+        realized_pnl = self._pnl.get_realized_pnl()
         log_event(
             logger,
             "INFO",
@@ -282,7 +293,8 @@ class PMMStrategy:
             quote_total=round(inventory.quote_total, 4),
             base_ratio=round(inventory.base_ratio, 4),
             total_value_usdt=round(inventory.total_value_in_quote, 2),
-            daily_pnl=round(daily_pnl, 2),
+            realized_pnl=round(realized_pnl, 4),
+            trade_count=self._pnl.trade_count,
         )
 
     def _log_fee_info(self) -> None:
@@ -304,7 +316,6 @@ class PMMStrategy:
             mid = self._get_mid_price()
             if mid and mid > 0:
                 inventory = self._get_inventory(mid)
-                self._pnl.start_value_quote = inventory.total_value_in_quote
                 log_event(
                     logger,
                     "INFO",

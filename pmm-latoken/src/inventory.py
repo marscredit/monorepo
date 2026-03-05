@@ -46,21 +46,59 @@ class InventoryState:
 
 @dataclass
 class PnLTracker:
-    """Tracks realized P&L from fills within a trading day."""
+    """Tracks realized P&L from executed trades.
+
+    Only counts actual fills (sell revenue minus buy cost) so that
+    unrealized mark-to-market swings on held inventory do not trigger
+    the daily loss limit.
+    """
 
     start_time: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    start_value_quote: float = 0.0
+    realized_pnl_quote: float = 0.0
     realized_fees_quote: float = 0.0
     trade_count: int = 0
+    _processed_trade_ids: set = field(default_factory=set)
 
-    def estimate_daily_pnl(self, current_value_quote: float) -> float:
-        return current_value_quote - self.start_value_quote
+    def process_trades(self, trades: list) -> None:
+        """Ingest new trades from the exchange and update realized P&L.
 
-    def reset(self, current_value_quote: float) -> None:
+        Accepts the raw list returned by ``LatokenWrapper.get_user_trades``.
+        Trades already seen (by id) are skipped automatically.
+        """
+        for trade in trades:
+            trade_id = str(trade.get("id", ""))
+            if not trade_id or trade_id in self._processed_trade_ids:
+                continue
+
+            self._processed_trade_ids.add(trade_id)
+
+            side = (trade.get("side") or trade.get("direction") or "").upper()
+            price = float(trade.get("price", 0))
+            quantity = float(trade.get("quantity", 0))
+            cost = float(trade.get("cost", 0)) or (price * quantity)
+            fee = float(trade.get("fee", 0))
+
+            if side == "SELL":
+                self.realized_pnl_quote += cost - fee
+            elif side == "BUY":
+                self.realized_pnl_quote -= cost + fee
+            else:
+                logger.warning("Unknown trade side %r for trade %s", side, trade_id)
+                continue
+
+            self.realized_fees_quote += fee
+            self.trade_count += 1
+
+    def get_realized_pnl(self) -> float:
+        """Net quote-currency profit/loss from executed trades."""
+        return self.realized_pnl_quote
+
+    def reset(self) -> None:
         self.start_time = datetime.now(timezone.utc)
-        self.start_value_quote = current_value_quote
+        self.realized_pnl_quote = 0.0
         self.realized_fees_quote = 0.0
         self.trade_count = 0
+        self._processed_trade_ids.clear()
 
 
 def compute_skewed_spreads(

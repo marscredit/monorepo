@@ -75,24 +75,68 @@ class TestInventoryState(unittest.TestCase):
 
 
 class TestPnLTracker(unittest.TestCase):
-    def test_pnl_positive(self):
-        tracker = PnLTracker(start_value_quote=100.0)
-        pnl = tracker.estimate_daily_pnl(110.0)
-        self.assertAlmostEqual(pnl, 10.0, places=2)
+    def test_sell_trade_adds_revenue(self):
+        tracker = PnLTracker()
+        tracker.process_trades([
+            {"id": "t1", "side": "SELL", "price": "0.005", "quantity": "1000", "cost": "5.0", "fee": "0.01"},
+        ])
+        self.assertAlmostEqual(tracker.get_realized_pnl(), 4.99, places=2)
+        self.assertEqual(tracker.trade_count, 1)
 
-    def test_pnl_negative(self):
-        tracker = PnLTracker(start_value_quote=100.0)
-        pnl = tracker.estimate_daily_pnl(90.0)
-        self.assertAlmostEqual(pnl, -10.0, places=2)
+    def test_buy_trade_subtracts_cost(self):
+        tracker = PnLTracker()
+        tracker.process_trades([
+            {"id": "t1", "side": "BUY", "price": "0.004", "quantity": "1000", "cost": "4.0", "fee": "0.01"},
+        ])
+        self.assertAlmostEqual(tracker.get_realized_pnl(), -4.01, places=2)
+        self.assertEqual(tracker.trade_count, 1)
 
-    def test_reset(self):
-        tracker = PnLTracker(start_value_quote=100.0)
-        tracker.trade_count = 50
-        tracker.realized_fees_quote = 5.0
-        tracker.reset(200.0)
-        self.assertEqual(tracker.start_value_quote, 200.0)
+    def test_net_pnl_from_buy_and_sell(self):
+        tracker = PnLTracker()
+        tracker.process_trades([
+            {"id": "t1", "side": "BUY", "price": "0.004", "quantity": "1000", "cost": "4.0", "fee": "0.01"},
+            {"id": "t2", "side": "SELL", "price": "0.005", "quantity": "1000", "cost": "5.0", "fee": "0.01"},
+        ])
+        self.assertAlmostEqual(tracker.get_realized_pnl(), 0.98, places=2)
+        self.assertEqual(tracker.trade_count, 2)
+        self.assertAlmostEqual(tracker.realized_fees_quote, 0.02, places=4)
+
+    def test_duplicate_trades_ignored(self):
+        tracker = PnLTracker()
+        trade = {"id": "t1", "side": "BUY", "price": "0.004", "quantity": "1000", "cost": "4.0", "fee": "0"}
+        tracker.process_trades([trade, trade, trade])
+        self.assertEqual(tracker.trade_count, 1)
+        self.assertAlmostEqual(tracker.get_realized_pnl(), -4.0, places=2)
+
+    def test_direction_field_alias(self):
+        tracker = PnLTracker()
+        tracker.process_trades([
+            {"id": "t1", "direction": "SELL", "price": "0.005", "quantity": "100", "cost": "0.5", "fee": "0"},
+        ])
+        self.assertAlmostEqual(tracker.get_realized_pnl(), 0.5, places=2)
+
+    def test_cost_computed_from_price_and_quantity(self):
+        tracker = PnLTracker()
+        tracker.process_trades([
+            {"id": "t1", "side": "SELL", "price": "0.005", "quantity": "1000", "fee": "0"},
+        ])
+        self.assertAlmostEqual(tracker.get_realized_pnl(), 5.0, places=2)
+
+    def test_reset_clears_state(self):
+        tracker = PnLTracker()
+        tracker.process_trades([
+            {"id": "t1", "side": "BUY", "price": "0.004", "quantity": "1000", "cost": "4.0", "fee": "0.01"},
+        ])
+        tracker.reset()
+        self.assertEqual(tracker.get_realized_pnl(), 0.0)
         self.assertEqual(tracker.trade_count, 0)
         self.assertEqual(tracker.realized_fees_quote, 0.0)
+
+    def test_empty_trades_no_effect(self):
+        tracker = PnLTracker()
+        tracker.process_trades([])
+        self.assertEqual(tracker.get_realized_pnl(), 0.0)
+        self.assertEqual(tracker.trade_count, 0)
 
 
 if __name__ == "__main__":
