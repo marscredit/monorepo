@@ -4,7 +4,7 @@ const STEPS = ['Welcome', 'Geth Download', 'Wallet', 'Miner Config', 'Ready'];
 
 export function Onboarding({ onComplete }: { onComplete: () => void }) {
   const [step, setStep] = useState(0);
-  const [gethStatus, setGethStatus] = useState<'checking' | 'missing' | 'downloading' | 'done' | 'error'>('checking');
+  const [gethStatus, setGethStatus] = useState<'checking' | 'missing' | 'downloading' | 'done' | 'error' | 'rosetta_missing'>('checking');
   const [downloadProgress, setDownloadProgress] = useState(0);
   const [walletChoice, setWalletChoice] = useState<'generate' | 'import_mnemonic' | 'import_key' | 'address_only' | null>(null);
   const [mnemonic, setMnemonic] = useState('');
@@ -21,7 +21,11 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
     if (!api) return;
     const check = async () => {
       const r = await api.geth.isAvailable();
-      setGethStatus(r.ok ? 'done' : 'missing');
+      if (r.rosettaMissing) {
+        setGethStatus('rosetta_missing');
+      } else {
+        setGethStatus(r.ok ? 'done' : 'missing');
+      }
     };
     check();
   }, [api]);
@@ -36,8 +40,13 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
       setGethStatus('done');
       unsub();
     } catch (e) {
-      setError((e as Error).message);
-      setGethStatus('error');
+      const msg = (e as Error).message;
+      if (msg.includes('ROSETTA_REQUIRED')) {
+        setGethStatus('rosetta_missing');
+      } else {
+        setError(msg);
+        setGethStatus('error');
+      }
       unsub();
     }
   };
@@ -196,6 +205,25 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
                 Next
               </button>
             </>
+          )}
+          {gethStatus === 'rosetta_missing' && (
+            <div className="space-y-3">
+              <p className="text-amber-200 text-sm">
+                Rosetta 2 is required to run the miner on Apple Silicon Macs.
+              </p>
+              <div className="p-3 bg-bg-panel rounded-xl border border-amber-600">
+                <p className="text-text-lo text-xs mb-1">Open Terminal and run:</p>
+                <code className="text-sm font-mono text-white">softwareupdate --install-rosetta</code>
+              </div>
+              <p className="text-text-lo text-xs">After installing Rosetta, restart this app and try again.</p>
+              <button
+                type="button"
+                onClick={() => { setGethStatus('checking'); const check = async () => { const r = await api.geth.isAvailable(); if (r.rosettaMissing) setGethStatus('rosetta_missing'); else setGethStatus(r.ok ? 'done' : 'missing'); }; check(); }}
+                className="px-5 py-2.5 bg-mars-400 rounded-xl font-semibold hover:bg-mars-300 transition-all"
+              >
+                Re-check
+              </button>
+            </div>
           )}
           {gethStatus === 'error' && (
             <button

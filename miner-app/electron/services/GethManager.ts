@@ -43,6 +43,25 @@ function getArchiveUrl(platformKey: PlatformKey): string | null {
   return `${BASE_URL}/${name}`;
 }
 
+/** Returns true if this is an Apple Silicon Mac (arm64). */
+function isAppleSilicon(): boolean {
+  return process.platform === 'darwin' && process.arch === 'arm64';
+}
+
+/**
+ * Check whether Rosetta 2 is installed. Required on Apple Silicon to run the
+ * bundled x86_64 geth binary. The rosetta directory is created by the OS when
+ * Rosetta is installed; this avoids spawning a subprocess.
+ */
+export function isRosettaInstalled(): boolean {
+  if (!isAppleSilicon()) return true;
+  try {
+    return fs.existsSync('/Library/Apple/usr/share/rosetta');
+  } catch {
+    return false;
+  }
+}
+
 /** Check if a geth binary supports ethash PoW mining (--mine and --miner.threads). Post-merge geth removed these. */
 export function supportsPoWMining(binaryPath: string): boolean {
   try {
@@ -202,7 +221,10 @@ function findSystemGeth(): string | null {
 }
 
 /** Check if Geth binary exists, is runnable, AND supports PoW mining. */
-export async function isGethAvailable(customPath?: string): Promise<{ ok: boolean; path: string; version?: string }> {
+export async function isGethAvailable(customPath?: string): Promise<{ ok: boolean; path: string; version?: string; rosettaMissing?: boolean }> {
+  if (isAppleSilicon() && !isRosettaInstalled()) {
+    return { ok: false, path: getGethBinaryPath(), rosettaMissing: true };
+  }
   const binPath = customPath || getGethBinaryPath();
   if (fs.existsSync(binPath) && supportsPoWMining(binPath)) {
     try {
@@ -221,17 +243,21 @@ export async function isGethAvailable(customPath?: string): Promise<{ ok: boolea
 }
 
 /**
- * Find the bundled geth binary from miner-apple-silicon (pre-merge, PoW-capable).
- * __dirname at runtime is dist-electron/services/, so we go up to the monorepo root.
+ * Find the bundled geth binary (pre-merge, PoW-capable).
+ *
+ * Packaged app: geth lives under process.resourcesPath/geth/geth (via extraResources).
+ * Dev mode: __dirname is dist-electron/services/, so ../../.. reaches the monorepo root
+ *           where miner-apple-silicon/Resources/geth/geth exists.
  */
 function findBundledGeth(): string | null {
   const candidates: string[] = [];
 
+  // Packaged app — extraResources copies resources/geth/geth → <resourcesPath>/geth/geth
   if (process.resourcesPath) {
     candidates.push(path.join(process.resourcesPath, 'geth', 'geth'));
   }
 
-  // In dev: dist-electron/services/ -> dist-electron/ -> miner-app/ -> monorepo/
+  // Dev mode: dist-electron/services/ -> dist-electron/ -> miner-app/ -> monorepo/
   const monorepoRoot = path.resolve(__dirname, '..', '..', '..');
   candidates.push(
     path.join(monorepoRoot, 'miner-apple-silicon', 'Resources', 'geth', 'geth'),
@@ -239,10 +265,16 @@ function findBundledGeth(): string | null {
       'Mars Credit Miner.app', 'Contents', 'Resources', 'geth', 'geth'),
   );
 
-  // Also try from app.getAppPath() which points to the project root in dev
+  // Dev mode: also try relative to miner-app/resources/ (where we keep the copy for packaging)
+  candidates.push(
+    path.join(monorepoRoot, 'miner-app', 'resources', 'geth', 'geth'),
+  );
+
+  // app.getAppPath() in dev points to the miner-app project root
   try {
     const appRoot = app.getAppPath();
     candidates.push(
+      path.join(appRoot, 'resources', 'geth', 'geth'),
       path.join(appRoot, '..', 'miner-apple-silicon', 'Resources', 'geth', 'geth'),
     );
   } catch { /* app not ready yet */ }
@@ -289,6 +321,13 @@ export async function downloadGeth(
 
   // ── macOS: bundled binary first (known PoW-compatible), then system PATH ──
   if (isMac()) {
+    if (isAppleSilicon() && !isRosettaInstalled()) {
+      throw new Error(
+        'ROSETTA_REQUIRED: Rosetta 2 is required to run the Mars Credit miner on Apple Silicon. ' +
+        'Open Terminal and run: softwareupdate --install-rosetta'
+      );
+    }
+
     onProgress?.({ percent: 5, downloadedBytes: 0, totalBytes: 0 });
 
     // Strategy 1: Bundled binary from miner-apple-silicon (v1.10.18, ethash PoW)

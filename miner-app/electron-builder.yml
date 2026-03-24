@@ -8,6 +8,8 @@ files:
 extraResources:
   - from: resources/genesis.json
     to: genesis.json
+  - from: resources/geth/geth
+    to: geth/geth
 mac:
   category: public.app-category.finance
   target:
