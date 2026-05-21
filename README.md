@@ -80,6 +80,8 @@ The block explorer and public website deploy to Railway using the root-level Doc
 
 Build from the repo root: `docker build -f Dockerfile.frontend .`
 
+Blockscan-specific Railway environment variables (OG image, top-accounts exclusions): see [frontend/deploy/BLOCKSCAN_ENV.md](frontend/deploy/BLOCKSCAN_ENV.md).
+
 ## License
 
 MIT

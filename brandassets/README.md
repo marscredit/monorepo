@@ -1,5 +1,11 @@
 # Mars Credit Brand
 
+## Block explorer social preview
+
+- `marscredit-og-1200x600.png` — Open Graph / link preview image (1200×600) for [blockscan.marscredit.xyz](https://blockscan.marscredit.xyz). Configure via `NEXT_PUBLIC_OG_IMAGE_URL` (see [frontend/deploy/BLOCKSCAN_ENV.md](../frontend/deploy/BLOCKSCAN_ENV.md)).
+
+Full logo and Mars art assets are in the [marscredit/brandassets](https://github.com/marscredit/brandassets) repository.
+
 ## Mars Brand Midjourney Prompt
 
 Add your custom scene information, followed by:

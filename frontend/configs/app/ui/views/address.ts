@@ -48,6 +48,18 @@ const hiddenViews = (() => {
   return result;
 })();
 
+const topAccountsExcludedAddresses = (() => {
+  const parsedValue = parseEnvJson<Array<string>>(getEnvValue('NEXT_PUBLIC_TOP_ACCOUNTS_EXCLUDED_ADDRESSES')) || [];
+
+  if (!Array.isArray(parsedValue)) {
+    return [];
+  }
+
+  return parsedValue
+    .filter((address): address is string => typeof address === 'string')
+    .map((address) => address.toLowerCase());
+})();
+
 const extraVerificationMethods: Array<SmartContractVerificationMethodExtra> = (() => {
   const envValue = getEnvValue('NEXT_PUBLIC_VIEWS_CONTRACT_EXTRA_VERIFICATION_METHODS');
   if (envValue === 'none') {
@@ -70,6 +82,9 @@ const config = Object.freeze({
     bech32Prefix,
   },
   hiddenViews,
+  topAccounts: {
+    excludedAddresses: topAccountsExcludedAddresses,
+  },
   solidityscanEnabled: getEnvValue('NEXT_PUBLIC_VIEWS_CONTRACT_SOLIDITYSCAN_ENABLED') === 'true',
   extraVerificationMethods,
 });

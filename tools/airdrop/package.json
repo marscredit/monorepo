@@ -1,0 +1,25 @@
+{
+  "name": "mars-credit-airdrop",
+  "version": "1.0.0",
+  "description": "CLI to distribute native MARS from treasury to a CSV recipient list",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "generate": "tsx src/generate-cli.ts",
+    "dune:export": "tsx src/dune-export-recipients.ts",
+    "dune:merge": "tsx src/merge-dune-recipients.ts",
+    "validate": "tsx src/validate-cli.ts",
+    "send": "tsx src/send.ts",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "ethers": "^6.9.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.0"
+  }
+}

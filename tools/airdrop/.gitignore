@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.env
+data/allocations.csv
+data/recipients.csv
+data/recipients-raw.csv
+data/dune-export-3500.json
+data/dune-export*.json
+data/dune-tier*.json
+data/cex-addresses.json
+data/recipients-summary.json
+transfers.jsonl
+*.log

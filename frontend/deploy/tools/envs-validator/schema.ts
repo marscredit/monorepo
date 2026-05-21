@@ -703,6 +703,11 @@ const schema = yup
       .transform(replaceQuotes)
       .json()
       .of(yup.string<AddressViewId>().oneOf(ADDRESS_VIEWS_IDS)),
+    NEXT_PUBLIC_TOP_ACCOUNTS_EXCLUDED_ADDRESSES: yup
+      .array()
+      .transform(replaceQuotes)
+      .json()
+      .of(yup.string().matches(/^0x[a-fA-F0-9]{40}$/, 'Invalid hex address in NEXT_PUBLIC_TOP_ACCOUNTS_EXCLUDED_ADDRESSES')),
     NEXT_PUBLIC_VIEWS_CONTRACT_SOLIDITYSCAN_ENABLED: yup.boolean(),
     NEXT_PUBLIC_VIEWS_CONTRACT_EXTRA_VERIFICATION_METHODS: yup
       .mixed()

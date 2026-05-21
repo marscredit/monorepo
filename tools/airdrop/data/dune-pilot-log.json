@@ -1,0 +1,60 @@
+{
+  "billingPeriod": "2026-05-21 — 2026-06-21",
+  "plan": "community_fluid_engine_v2",
+  "creditsQuota": 2500,
+  "creditsUsedAfterTieredRun": 464.772,
+  "tieredBalancesDaily": {
+    "queryId": 7550443,
+    "state": "FAILED",
+    "error": "Query execution timed out after 2 minutes (Community tier cap on tokens_ethereum.balances_daily)"
+  },
+  "communityExports": [
+    {
+      "name": "p2p_org.dataset_eth_holders_may29 page 1",
+      "queryId": 7550472,
+      "executionId": "01KS4MFZKNQE0TQ4FQYFZ2EJH9",
+      "rows": 32000,
+      "executionCostCredits": "0.003"
+    },
+    {
+      "name": "p2p_org page 2",
+      "executionId": "01KS4MFZKNQE0TQ4FQYFZ2EJH9",
+      "offset": 32000,
+      "rows": 7727,
+      "executionCostCredits": "0.003"
+    },
+    {
+      "name": "beesblabs.result_ethereum_top_balances",
+      "queryId": 7550474,
+      "rows": 10000,
+      "executionCostCredits": "0.003"
+    },
+    {
+      "name": "cex_ethereum.addresses",
+      "queryId": 7550476,
+      "rows": 4367,
+      "executionCostCredits": "0.003"
+    },
+    {
+      "name": "yieldfarmers labeled 3500",
+      "file": "dune-export-3500.json",
+      "rows": 3501,
+      "executionCostCredits": "0.003"
+    }
+  ],
+  "mergeResult": {
+    "totalBeforeCap": 41531,
+    "recipientCount": 20000,
+    "maxRecipients": 20000,
+    "minEthBalance": 233.997,
+    "maxEthBalance": 3308877.4494265174,
+    "output": "data/recipients.csv"
+  },
+  "allocationsResult": {
+    "rows": 20000,
+    "amountMarsPerWallet": 13500,
+    "totalMars": 270000000,
+    "output": "data/allocations.csv",
+    "validation": "passed"
+  }
+}

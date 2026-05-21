@@ -3,6 +3,7 @@ import BigNumber from 'bignumber.js';
 import React from 'react';
 
 import config from 'configs/app';
+import { filterTopAccountsItems } from 'lib/addresses/filterTopAccountsItems';
 import { getTotalSupplyFromItems } from 'lib/addresses/totalSupplyFromItems';
 import { TOP_ADDRESS } from 'stubs/address';
 import { generateListStub } from 'stubs/utils';
@@ -41,25 +42,32 @@ const Accounts = () => {
     </ActionBar>
   );
 
-  const pageStartIndex = (pagination.page - 1) * PAGE_SIZE + 1;
-  const totalSupply = React.useMemo(
-    () => getTotalSupplyFromItems(data?.items, config.chain.currency.decimals),
-    [ data?.items, config.chain.currency.decimals ],
+  const excludedAddresses = config.UI.views.address.topAccounts.excludedAddresses;
+
+  const visibleItems = React.useMemo(
+    () => filterTopAccountsItems(data?.items, excludedAddresses),
+    [ data?.items, excludedAddresses ],
   );
 
-  const content = data?.items ? (
+  const pageStartIndex = (pagination.page - 1) * PAGE_SIZE + 1;
+  const totalSupply = React.useMemo(
+    () => getTotalSupplyFromItems(visibleItems, config.chain.currency.decimals),
+    [ visibleItems, config.chain.currency.decimals ],
+  );
+
+  const content = visibleItems ? (
     <>
       <Hide below="lg" ssr={ false }>
         <AddressesTable
           top={ pagination.isVisible ? ACTION_BAR_HEIGHT_DESKTOP : 0 }
-          items={ data.items }
+          items={ visibleItems }
           totalSupply={ totalSupply }
           pageStartIndex={ pageStartIndex }
           isLoading={ isPlaceholderData }
         />
       </Hide>
       <Show below="lg" ssr={ false }>
-        { data.items.map((item, index) => {
+        { visibleItems.map((item, index) => {
           return (
             <AddressesListItem
               key={ item.hash + (isPlaceholderData ? index : '') }
@@ -79,7 +87,7 @@ const Accounts = () => {
       <PageTitle title="Top accounts" withTextAd/>
       <DataListDisplay
         isError={ isError }
-        items={ data?.items }
+        items={ visibleItems }
         emptyText="There are no accounts."
         content={ content }
         actionBar={ actionBar }
