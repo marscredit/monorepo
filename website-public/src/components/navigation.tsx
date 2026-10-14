@@ -12,6 +12,7 @@ import { DOWNLOADS } from "@/lib/download"
 const navigation = [
   { name: "Home", href: "/" },
   { name: "The Story", href: "/story" },
+  { name: "Tokenomics", href: "/tokenomics" },
   { name: "Updates", href: "/updates" },
   { name: "Blockscan", href: links.blockscan, external: true },
 ]
