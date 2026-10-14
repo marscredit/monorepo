@@ -41,18 +41,18 @@ const timeline = [
     status: "completed"
   },
   {
-    phase: "Bridge",
-    title: "Solana Integration",
-    description: "Expanding accessibility by bridging MARS to Solana, bringing liquidity and trading opportunities.",
+    phase: "Supply",
+    title: "Genesis Allocation Burned",
+    description: "On July 9, 2024, 47 billion MARS from the genesis allocation was sent to the 0x…dEaD burn address, verifiable on Blockscan.",
     icon: Globe,
     status: "completed"
   },
   {
     phase: "Community",
     title: "Grants Program",
-    description: "Supporting builders and innovators who share our vision of interplanetary commerce and settlement.",
+    description: "Supporting builders and innovators who share our vision of interplanetary commerce and settlement. Currently paused.",
     icon: Users,
-    status: "active"
+    status: "paused"
   },
   {
     phase: "Future",
@@ -66,7 +66,7 @@ const timeline = [
 const principles = [
   {
     title: "Fairness",
-    description: "No premine, no insider allocations. Every MARS token is earned through mining or fair market exchange."
+    description: "Transparent supply. The genesis allocation was 47.304B MARS; 47B of it was burned on-chain and ~270M was airdropped to the community. All other MARS comes from solo mining at 2 MARS per block."
   },
   {
     title: "Simplicity", 
@@ -212,6 +212,11 @@ export default function StoryPage() {
                           {milestone.status === 'active' && (
                             <span className="text-xs bg-mars-400/30 text-mars-200 px-2 py-1 rounded-full animate-pulse">
                               ⚡ Active
+                            </span>
+                          )}
+                          {milestone.status === 'paused' && (
+                            <span className="text-xs bg-panel text-text-lo px-2 py-1 rounded-full">
+                              ⏸ Paused
                             </span>
                           )}
                         </div>

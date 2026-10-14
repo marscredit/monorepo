@@ -22,9 +22,7 @@ export const metadata: Metadata = {
     siteName: site.name,
     images: [
       {
-        url: '/og-image.png',
-        width: 1200,
-        height: 630,
+        url: '/brand/marscredit_wide_transparent.png',
         alt: site.name,
       },
     ],
@@ -33,7 +31,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: site.name,
     description: site.description,
-    images: ['/og-image.png'],
+    images: ['/brand/marscredit_wide_transparent.png'],
     creator: `@${site.twitter}`,
   },
   robots: {
