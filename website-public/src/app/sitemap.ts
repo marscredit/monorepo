@@ -6,12 +6,10 @@ const baseUrl = site.url
 const staticPaths = [
   "",
   "/story",
+  "/tokenomics",
   "/updates",
   "/updates/solana-bridge-paused",
-  "/updates/solana-bridge-live",
   "/updates/macos-mining-app-released",
-  "/updates/mainnet-milestone-3-3m-blocks",
-  "/updates/grants-program-launched",
 ]
 
 export default function sitemap(): MetadataRoute.Sitemap {

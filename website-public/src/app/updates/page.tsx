@@ -29,36 +29,12 @@ const updates = [
     readTime: "3 min read",
   },
   {
-    slug: "solana-bridge-live",
-    title: "Solana Bridge Now Live",
-    date: "2025-08-15",
-    summary: "Mars Credit is now available on Solana! Trade MARS tokens with improved liquidity and access through our new bridge integration.",
-    tags: ["bridge", "solana", "trading"],
-    readTime: "3 min read",
-  },
-  {
     slug: "macos-mining-app-released",
     title: "MacOS Mining App Released",
     date: "2025-07-28",
     summary: "Mining Mars Credit is now easier than ever with our native MacOS application. Download and start mining with just a few clicks.",
     tags: ["mining", "macos", "app"],
     readTime: "2 min read",
-  },
-  {
-    slug: "mainnet-milestone-3-3m-blocks",
-    title: "Mainnet Milestone: 3.3M+ Blocks Mined",
-    date: "2025-06-12",
-    summary: "The Mars Credit network has successfully mined over 3.3 million blocks, demonstrating the strength and reliability of our proof-of-work consensus.",
-    tags: ["mainnet", "milestone", "pow"],
-    readTime: "4 min read",
-  },
-  {
-    slug: "grants-program-launched", 
-    title: "Mars Credit Grants Program Launched",
-    date: "2025-05-20",
-    summary: "Supporting developers and innovators building on Mars Credit with our new grants program. Apply now to bring your Mars-focused projects to life.",
-    tags: ["grants", "community", "development"],
-    readTime: "5 min read",
   },
 ]
 

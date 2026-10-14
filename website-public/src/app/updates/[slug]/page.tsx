@@ -160,65 +160,6 @@ const updates: Record<string, {
       </div>
     )
   },
-  "solana-bridge-live": {
-    title: "Solana Bridge Now Live",
-    date: "2025-08-15",
-    readTime: "3 min read",
-    tags: ["bridge", "solana", "trading"],
-    content: (
-      <div className="prose prose-lg max-w-none prose-invert">
-        <p className="text-xl text-text-med leading-relaxed">
-          We're excited to announce that Mars Credit (MARS) is now available on Solana! 
-          This integration marks a significant milestone in our mission to make MARS 
-          accessible across multiple blockchain ecosystems.
-        </p>
-        
-        <h2 className="text-2xl font-bold text-text-hi mt-8 mb-4">What This Means</h2>
-        <p className="text-text-med leading-relaxed">
-          The Solana bridge opens up new opportunities for MARS holders:
-        </p>
-        <ul className="text-text-med space-y-2">
-          <li>• <strong>Enhanced Liquidity:</strong> Trade MARS on Solana's vibrant DEX ecosystem</li>
-          <li>• <strong>Lower Fees:</strong> Benefit from Solana's low transaction costs</li>
-          <li>• <strong>Faster Trades:</strong> Near-instant transaction finality</li>
-          <li>• <strong>DeFi Integration:</strong> Use MARS in Solana DeFi protocols</li>
-        </ul>
-
-        <h2 className="text-2xl font-bold text-text-hi mt-8 mb-4">How to Use the Bridge</h2>
-        <p className="text-text-med leading-relaxed">
-          Bridging your MARS tokens to Solana is straightforward:
-        </p>
-        <ol className="text-text-med space-y-2">
-          <li>1. Visit our bridge interface at <code>bridge.marscredit.xyz</code></li>
-          <li>2. Connect your Mars Credit and Solana wallets</li>
-          <li>3. Specify the amount of MARS to bridge</li>
-          <li>4. Confirm the transaction and wait for confirmation</li>
-        </ol>
-
-        <h2 className="text-2xl font-bold text-text-hi mt-8 mb-4">Trading on Solana</h2>
-        <p className="text-text-med leading-relaxed">
-          Once your MARS tokens are on Solana, you can trade them on popular DEX platforms. 
-          We recommend using established platforms like Jupiter or Raydium for the best 
-          trading experience.
-        </p>
-
-        <div className="bg-mars-950/50 border border-mars-500/20 rounded-lg p-6 my-8">
-          <h3 className="text-lg font-semibold text-mars-300 mb-2">Security Notice</h3>
-          <p className="text-text-med text-sm">
-            Always verify contract addresses and use official bridge interfaces. 
-            The Mars Credit team will never ask for your private keys or seed phrases.
-          </p>
-        </div>
-
-        <h2 className="text-2xl font-bold text-text-hi mt-8 mb-4">What's Next</h2>
-        <p className="text-text-med leading-relaxed">
-          This bridge is just the beginning. We're working on additional integrations 
-          and features to make Mars Credit the most accessible interplanetary currency. 
-          Stay tuned for more updates!
-        </p>
-      </div>
-    )
-  },
   "macos-mining-app-released": {
     title: "MacOS Mining App Released", 
     date: "2025-07-28",
