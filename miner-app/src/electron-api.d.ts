@@ -6,7 +6,7 @@ export interface GethDownloadProgress {
 
 export interface ElectronAPI {
   geth: {
-    isAvailable: (customPath?: string) => Promise<{ ok: boolean; path: string; version?: string }>;
+    isAvailable: (customPath?: string) => Promise<{ ok: boolean; path: string; version?: string; rosettaMissing?: boolean }>;
     download: () => Promise<{ path: string; version: string }>;
     getPath: () => Promise<string>;
     onDownloadProgress: (callback: (p: GethDownloadProgress) => void) => () => void;
