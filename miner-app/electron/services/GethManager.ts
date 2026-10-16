@@ -1,29 +1,37 @@
 /**
  * GethManager: Download, verify, and manage Geth binary per platform.
- * Linux/Windows: downloads from official gethstore.
- * macOS: uses bundled pre-merge binary from miner-apple-silicon (v1.10.18, ethash PoW).
- * Post-merge Geth (v1.13+) removed --mine/--miner.threads and cannot mine Mars Credit.
+ *
+ * Mars Credit runs its own geth fork (go-marscredit branch mars-fast-v1, version
+ * 1.10.18-mars-fast1): ethash PoW, 2 s LWMA difficulty after the fast-block fork.
+ * Every platform must run that build. Stock geth (any version) will fork off the
+ * chain at the fork height, and post-merge geth (v1.13+) cannot mine at all.
+ *
+ * Linux/Windows: download the fork build from the go-marscredit GitHub release and
+ * check its SHA-256. macOS: use the bundled fork binary (resources/geth/geth).
  */
 
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import * as https from 'https';
+import * as crypto from 'crypto';
 import { execSync, spawn } from 'child_process';
 import { app } from 'electron';
 import { getPlatformKey, isMac, type PlatformKey } from '../utils/platform';
 import { getBinDir, getGethBinaryPath } from '../utils/paths';
 import { logger } from '../utils/logger';
 
-const GETH_VERSION = '1.16.8';
-const GETH_COMMIT = 'abeb78c6';
-const BASE_URL = 'https://gethstore.blob.core.windows.net/builds';
+/** Version string every Mars geth must report (`geth version` -> "Version: 1.10.18-mars-fast1"). */
+export const REQUIRED_GETH_VERSION = '1.10.18-mars-fast1';
+const GETH_RELEASE_TAG = 'v1.10.18-mars-fast1';
+const BASE_URL = `https://github.com/marscredit/go-marscredit/releases/download/${GETH_RELEASE_TAG}`;
 
-const PLATFORM_ARCHIVES: Partial<Record<PlatformKey, string>> = {
-  'win32-x64': `geth-windows-amd64-${GETH_VERSION}-${GETH_COMMIT}.zip`,
-  'win32-arm64': `geth-windows-arm64-${GETH_VERSION}-${GETH_COMMIT}.zip`,
-  'linux-x64': `geth-linux-amd64-${GETH_VERSION}-${GETH_COMMIT}.tar.gz`,
-  'linux-arm64': `geth-linux-arm64-${GETH_VERSION}-${GETH_COMMIT}.tar.gz`,
+// SHA-256 of the release assets (built from go-marscredit mars-fast-v1 @ 4d549c7f).
+// The files uploaded to the release must be byte-identical to these.
+const PLATFORM_ARCHIVES: Partial<Record<PlatformKey, { name: string; sha256: string }>> = {
+  'win32-x64': { name: 'geth-windows-amd64.zip', sha256: 'd7ebe8c61d15a6938467414811203233644257775e54a545b62e45c903578dab' },
+  'linux-x64': { name: 'geth-linux-amd64.tar.gz', sha256: '258898f681b7140c03a515ee4bf186f6cc05c545e11761f4a3e25b430e6d24df' },
+  'linux-arm64': { name: 'geth-linux-arm64.tar.gz', sha256: 'fa95a1a8bd7fd0d60b8d84e8915eef66675dded7b3af11a0fe513cd89d002989' },
 };
 
 export interface GethDownloadProgress {
@@ -37,10 +45,24 @@ export interface GethManagerResult {
   version: string;
 }
 
-function getArchiveUrl(platformKey: PlatformKey): string | null {
-  const name = PLATFORM_ARCHIVES[platformKey];
-  if (!name) return null;
-  return `${BASE_URL}/${name}`;
+function getArchive(platformKey: PlatformKey): { url: string; sha256: string } | null {
+  const a = PLATFORM_ARCHIVES[platformKey];
+  if (!a) return null;
+  return { url: `${BASE_URL}/${a.name}`, sha256: a.sha256 };
+}
+
+function sha256File(p: string): string {
+  return crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+}
+
+/** True if the binary reports the required Mars fork version. */
+export function isMarsGeth(binaryPath: string): boolean {
+  try {
+    const out = execSync(`"${binaryPath}" version`, { encoding: 'utf8', timeout: 10_000, stdio: 'pipe' });
+    return out.includes(`Version: ${REQUIRED_GETH_VERSION}`);
+  } catch {
+    return false;
+  }
 }
 
 /** Returns true if this is an Apple Silicon Mac (arm64). */
@@ -184,7 +206,7 @@ export function getGethVersion(binaryPath: string): Promise<string> {
         reject(new Error(out || `geth version exited ${code}`));
         return;
       }
-      const match = out.match(/Version: (\d+\.\d+\.\d+)/);
+      const match = out.match(/Version: (\d+\.\d+\.\d+(?:-[\w.-]+)?)/);
       resolve(match ? match[1] : out.trim());
     });
     proc.on('error', reject);
@@ -211,11 +233,11 @@ function findSystemGeth(): string | null {
   } catch { /* not on PATH */ }
 
   for (const p of candidates) {
-    if (supportsPoWMining(p)) {
-      logger.info('Found PoW-compatible system geth', { path: p });
+    if (supportsPoWMining(p) && isMarsGeth(p)) {
+      logger.info('Found Mars geth on system', { path: p });
       return p;
     }
-    logger.info('System geth does not support PoW mining, skipping', { path: p });
+    logger.info(`System geth is not ${REQUIRED_GETH_VERSION}, skipping`, { path: p });
   }
   return null;
 }
@@ -226,7 +248,8 @@ export async function isGethAvailable(customPath?: string): Promise<{ ok: boolea
     return { ok: false, path: getGethBinaryPath(), rosettaMissing: true };
   }
   const binPath = customPath || getGethBinaryPath();
-  if (fs.existsSync(binPath) && supportsPoWMining(binPath)) {
+  // An existing install of stock geth must be replaced, so require the fork version.
+  if (fs.existsSync(binPath) && supportsPoWMining(binPath) && isMarsGeth(binPath)) {
     try {
       const version = await getGethVersion(binPath);
       return { ok: true, path: binPath, version };
@@ -243,7 +266,7 @@ export async function isGethAvailable(customPath?: string): Promise<{ ok: boolea
 }
 
 /**
- * Find the bundled geth binary (pre-merge, PoW-capable).
+ * Find the bundled Mars geth binary (1.10.18-mars-fast1).
  *
  * Packaged app: geth lives under process.resourcesPath/geth/geth (via extraResources).
  * Dev mode: __dirname is dist-electron/services/, so ../../.. reaches the monorepo root
@@ -300,9 +323,9 @@ async function installFromPath(
   fs.copyFileSync(sourcePath, finalPath);
   fs.chmodSync(finalPath, 0o755);
 
-  if (!supportsPoWMining(finalPath)) {
+  if (!supportsPoWMining(finalPath) || !isMarsGeth(finalPath)) {
     fs.unlinkSync(finalPath);
-    throw new Error(`${label || sourcePath} does not support PoW mining (post-merge geth)`);
+    throw new Error(`${label || sourcePath} is not Mars geth ${REQUIRED_GETH_VERSION}`);
   }
 
   const version = await getGethVersion(finalPath);
@@ -330,7 +353,7 @@ export async function downloadGeth(
 
     onProgress?.({ percent: 5, downloadedBytes: 0, totalBytes: 0 });
 
-    // Strategy 1: Bundled binary from miner-apple-silicon (v1.10.18, ethash PoW)
+    // Strategy 1: Bundled Mars fork binary (resources/geth/geth)
     const bundled = findBundledGeth();
     if (bundled) {
       try {
@@ -351,22 +374,27 @@ export async function downloadGeth(
     }
 
     throw new Error(
-      'Could not find a PoW-compatible Geth binary. Mars Credit requires Geth v1.12 or earlier. ' +
-      'The bundled binary was not found. Please ensure the miner-apple-silicon directory is present in the monorepo.'
+      `Could not find Mars geth ${REQUIRED_GETH_VERSION}. The bundled binary (resources/geth/geth) ` +
+      'is missing or is not the Mars fork build.'
     );
   }
 
-  // ── Linux / Windows: download from gethstore ──
-  const url = getArchiveUrl(platformKey);
-  if (!url) {
+  // ── Linux / Windows: download the Mars fork build from the go-marscredit release ──
+  const archive = getArchive(platformKey);
+  if (!archive) {
     throw new Error(`Unsupported platform for Geth download: ${platformKey}`);
   }
+  const url = archive.url;
 
   const ext = path.extname(url);
   const archivePath = path.join(os.tmpdir(), `geth-download-${Date.now()}${ext}`);
 
   try {
     await downloadFile(url, archivePath, onProgress);
+    const got = sha256File(archivePath);
+    if (got !== archive.sha256) {
+      throw new Error(`Checksum mismatch for ${url}: got ${got}, want ${archive.sha256}`);
+    }
     const extractDir = path.join(os.tmpdir(), `geth-extract-${Date.now()}`);
     const extractedBinary = ext === '.zip'
       ? await extractZip(archivePath, extractDir)
@@ -380,6 +408,10 @@ export async function downloadGeth(
     fs.unlinkSync(archivePath);
     fs.rmSync(extractDir, { recursive: true, force: true });
 
+    if (!isMarsGeth(finalPath)) {
+      fs.unlinkSync(finalPath);
+      throw new Error(`Downloaded geth is not ${REQUIRED_GETH_VERSION}`);
+    }
     const version = await getGethVersion(finalPath);
     logger.info('Geth downloaded and verified', { path: finalPath, version });
     return { path: finalPath, version };
