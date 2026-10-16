@@ -6,3 +6,8 @@
 # OS files
 .DS_Store
 Thumbs.db
+
+# Mars geth binaries filled by scripts/prepare-geth.mjs (per OS/arch)
+miner-app/resources/geth/darwin-*/
+miner-app/resources/geth/win-x64/
+miner-app/release/

@@ -6,8 +6,9 @@
  * Every platform must run that build. Stock geth (any version) will fork off the
  * chain at the fork height, and post-merge geth (v1.13+) cannot mine at all.
  *
- * Linux/Windows: download the fork build from the go-marscredit GitHub release and
- * check its SHA-256. macOS: use the bundled fork binary (resources/geth/geth).
+ * macOS and Windows: use the fork binary bundled in the app (resources/geth/geth or
+ * geth.exe, one per OS/arch build). Windows and Linux fall back to downloading the
+ * fork build from the go-marscredit GitHub release, with a SHA-256 check.
  */
 
 import * as fs from 'fs';
@@ -70,13 +71,30 @@ function isAppleSilicon(): boolean {
   return process.platform === 'darwin' && process.arch === 'arm64';
 }
 
+/** Read a Mach-O header and report whether the binary is x86_64-only. */
+function isX86_64MachO(binaryPath: string): boolean {
+  try {
+    const fd = fs.openSync(binaryPath, 'r');
+    const buf = Buffer.alloc(8);
+    fs.readSync(fd, buf, 0, 8, 0);
+    fs.closeSync(fd);
+    // MH_MAGIC_64 (0xfeedfacf, little-endian) followed by CPU_TYPE_X86_64 (0x01000007)
+    return buf.readUInt32LE(0) === 0xfeedfacf && buf.readUInt32LE(4) === 0x01000007;
+  } catch {
+    return false;
+  }
+}
+
 /**
- * Check whether Rosetta 2 is installed. Required on Apple Silicon to run the
- * bundled x86_64 geth binary. The rosetta directory is created by the OS when
- * Rosetta is installed; this avoids spawning a subprocess.
+ * Check whether Rosetta 2 is needed and installed. Only matters on Apple Silicon when
+ * the geth we would run is an x86_64 binary. The Apple Silicon app build bundles a
+ * native arm64 geth, so Rosetta is not needed there. The rosetta directory is created
+ * by the OS when Rosetta is installed; this avoids spawning a subprocess.
  */
 export function isRosettaInstalled(): boolean {
   if (!isAppleSilicon()) return true;
+  const bundled = findBundledGeth();
+  if (bundled && !isX86_64MachO(bundled)) return true;
   try {
     return fs.existsSync('/Library/Apple/usr/share/rosetta');
   } catch {
@@ -274,10 +292,21 @@ export async function isGethAvailable(customPath?: string): Promise<{ ok: boolea
  */
 function findBundledGeth(): string | null {
   const candidates: string[] = [];
+  const exe = process.platform === 'win32' ? 'geth.exe' : 'geth';
 
-  // Packaged app — extraResources copies resources/geth/geth → <resourcesPath>/geth/geth
+  // Packaged app — extraResources copies resources/geth/<os>-<arch>/geth[.exe] → <resourcesPath>/geth/geth[.exe]
   if (process.resourcesPath) {
-    candidates.push(path.join(process.resourcesPath, 'geth', 'geth'));
+    candidates.push(path.join(process.resourcesPath, 'geth', exe));
+  }
+  if (process.platform === 'win32') {
+    // Windows has no dev-mode fallbacks below (they are darwin binaries).
+    for (const p of candidates) {
+      if (fs.existsSync(p)) {
+        logger.info('Found bundled geth', { path: p });
+        return p;
+      }
+    }
+    return null;
   }
 
   // Dev mode: dist-electron/services/ -> dist-electron/ -> miner-app/ -> monorepo/
@@ -288,8 +317,10 @@ function findBundledGeth(): string | null {
       'Mars Credit Miner.app', 'Contents', 'Resources', 'geth', 'geth'),
   );
 
-  // Dev mode: also try relative to miner-app/resources/ (where we keep the copy for packaging)
+  // Dev mode: also try miner-app/resources/geth/darwin-<arch>/geth (filled by scripts/prepare-geth.mjs)
+  const devArch = process.arch === 'arm64' ? 'darwin-arm64' : 'darwin-x64';
   candidates.push(
+    path.join(monorepoRoot, 'miner-app', 'resources', 'geth', devArch, 'geth'),
     path.join(monorepoRoot, 'miner-app', 'resources', 'geth', 'geth'),
   );
 
@@ -297,6 +328,7 @@ function findBundledGeth(): string | null {
   try {
     const appRoot = app.getAppPath();
     candidates.push(
+      path.join(appRoot, 'resources', 'geth', devArch, 'geth'),
       path.join(appRoot, 'resources', 'geth', 'geth'),
       path.join(appRoot, '..', 'miner-apple-silicon', 'Resources', 'geth', 'geth'),
     );
@@ -379,7 +411,19 @@ export async function downloadGeth(
     );
   }
 
-  // ── Linux / Windows: download the Mars fork build from the go-marscredit release ──
+  // ── Windows: bundled Mars fork geth.exe first (shipped in the installer) ──
+  if (process.platform === 'win32') {
+    const bundled = findBundledGeth();
+    if (bundled) {
+      try {
+        return await installFromPath(bundled, finalPath, onProgress, 'bundled binary');
+      } catch (e) {
+        logger.warn('Bundled geth.exe failed, falling back to download', { error: (e as Error).message });
+      }
+    }
+  }
+
+  // ── Linux / Windows fallback: download the Mars fork build from the go-marscredit release ──
   const archive = getArchive(platformKey);
   if (!archive) {
     throw new Error(`Unsupported platform for Geth download: ${platformKey}`);
