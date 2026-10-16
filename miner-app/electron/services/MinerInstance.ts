@@ -17,11 +17,32 @@ import { logger } from '../utils/logger';
 import { initMinerDataDir } from './GenesisInit';
 
 const NETWORK_ID = 110110;
-const BOOTNODES =
-  'enode://bf93a274569cd009e4172c1a41b8bde1fb8d8e7cff1e5130707a0cf5be4ce0fc673c8a138ecb7705025ea4069da8c1d4b7ffc66e8666f7936aa432ce57693353@roundhouse.proxy.rlwy.net:50590,' +
-  'enode://ca3639067a580a0f1db7412aeeef6d5d5e93606ed7f236a5343fe0d1115fb8c2bea2a22fa86e9794b544f886a4cb0de1afcbccf60960802bf00d81dab9553ec9@monorail.proxy.rlwy.net:26254,' +
-  'enode://7f2ee75a1c112735aaa43de1e5a6c4d7e07d03a5352b5782ed8e0c7cc046a8c8839ad093b09649e0b4a6ed8900211fb4438765c99d07bb00006ef080a1aa9ab6@viaduct.proxy.rlwy.net:30270,' +
-  'enode://98710174f4798dae1931e417944ac7a7fb3268d38ef8d3941c8fcc44fe178b118003d8b3d61d85af39c561235a1708f8dd61f8ba47df4c4a6b9156e272af2cfc@monorail.proxy.rlwy.net:29138';
+// Railway trusted nodes. Discovery (UDP) does not pass Railway's TCP proxies, so
+// these are also written to static-nodes.json, which geth dials directly over TCP
+// and re-dials after any restart.
+const TRUSTED_NODES = [
+  // node99 (public RPC node)
+  'enode://478d4dd8e56a6419d32a7f1166983566bf5c184d1fd97036bca04a2f8e5a6e7546492e38ebf16fbdb0c838c9d127ee70b5de6a7e1cdc5d337adc616f91baf98f@interchange.proxy.rlwy.net:42747',
+  // node2
+  'enode://ca3639067a580a0f1db7412aeeef6d5d5e93606ed7f236a5343fe0d1115fb8c2bea2a22fa86e9794b544f886a4cb0de1afcbccf60960802bf00d81dab9553ec9@roundhouse.proxy.rlwy.net:26254',
+];
+const BOOTNODES = TRUSTED_NODES.join(',');
+
+/** Write <datadir>/geth/static-nodes.json (read by geth 1.10.x at startup). */
+function writeStaticNodes(dataDir: string): void {
+  const gethDir = path.join(dataDir, 'geth');
+  fs.mkdirSync(gethDir, { recursive: true });
+  const file = path.join(gethDir, 'static-nodes.json');
+  const body = JSON.stringify(TRUSTED_NODES, null, 2) + '\n';
+  try {
+    if (!fs.existsSync(file) || fs.readFileSync(file, 'utf8') !== body) {
+      fs.writeFileSync(file, body);
+      logger.info('Wrote static-nodes.json', { file, count: TRUSTED_NODES.length });
+    }
+  } catch (e) {
+    logger.warn('Could not write static-nodes.json', { file, error: (e as Error).message });
+  }
+}
 
 export interface MinerInstanceConfig {
   minerIndex: number;
@@ -91,6 +112,7 @@ export class MinerInstance extends EventEmitter {
     initMinerDataDir(this.config.gethBinaryPath, this.config.minerIndex);
 
     const dataDir = getMinerDataDir(this.config.minerIndex);
+    writeStaticNodes(dataDir);
     const keystoreDir = getMinerKeystoreDir(this.config.minerIndex);
     const logsDir = getMinerLogsDir(this.config.minerIndex);
     fs.mkdirSync(logsDir, { recursive: true });

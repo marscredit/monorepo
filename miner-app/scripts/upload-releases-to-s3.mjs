@@ -45,20 +45,22 @@ const s3 = new S3Client({
   forcePathStyle: false,
 });
 
+const VERSION = JSON.parse(readFileSync(resolve(__dirname, "..", "package.json"), "utf8")).version;
+
 const ARTIFACTS = [
   {
-    file: "Mars Credit Miner-1.0.0-arm64.dmg",
-    key: "releases/v1.0.0/Mars Credit Miner-1.0.0-arm64.dmg",
+    file: "Mars-Credit-Miner-mac-arm64.dmg",
+    key: `releases/v${VERSION}/Mars-Credit-Miner-mac-arm64.dmg`,
     contentType: "application/x-apple-diskimage",
   },
   {
-    file: "Mars Credit Miner-1.0.0.dmg",
-    key: "releases/v1.0.0/Mars Credit Miner-1.0.0.dmg",
+    file: "Mars-Credit-Miner-mac-x64.dmg",
+    key: `releases/v${VERSION}/Mars-Credit-Miner-mac-x64.dmg`,
     contentType: "application/x-apple-diskimage",
   },
   {
-    file: "Mars Credit Miner Setup 1.0.0.exe",
-    key: "releases/v1.0.0/Mars Credit Miner Setup 1.0.0.exe",
+    file: "Mars-Credit-Miner-win-x64-setup.exe",
+    key: `releases/v${VERSION}/Mars-Credit-Miner-win-x64-setup.exe`,
     contentType: "application/vnd.microsoft.portable-executable",
   },
 ];

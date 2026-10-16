@@ -1,7 +1,7 @@
 {
   "name": "mars-credit-miner",
   "productName": "Mars Credit Miner",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Cross-platform Mars Credit mining application",
   "main": "dist-electron/main.js",
   "author": "Mars Credit",
@@ -13,7 +13,8 @@
     "build:win": "tsc && vite build && electron-builder --win",
     "preview": "vite preview",
     "electron:dev": "concurrently \"vite --port 5199 --strictPort\" \"wait-on http://localhost:5199 && tsc -p tsconfig.electron.json && VITE_DEV_PORT=5199 electron .\"",
-    "electron:build": "tsc -p tsconfig.electron.json && vite build && electron-builder"
+    "electron:build": "tsc -p tsconfig.electron.json && vite build && electron-builder",
+    "prepare-geth": "node scripts/prepare-geth.mjs"
   },
   "dependencies": {
     "adm-zip": "^0.5.16",

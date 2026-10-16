@@ -5,11 +5,11 @@ directories:
 files:
   - dist/**/*
   - dist-electron/**/*
+# geth is per OS/arch (go-marscredit v1.10.18-mars-fast1). Run `npm run prepare-geth`
+# first; it fills resources/geth/<os>-<arch>/ and checks SHA-256.
 extraResources:
   - from: resources/genesis.json
     to: genesis.json
-  - from: resources/geth/geth
-    to: geth/geth
 mac:
   category: public.app-category.finance
   target:
@@ -18,7 +18,12 @@ mac:
         - x64
         - arm64
   icon: resources/icons/icon.png
+  artifactName: Mars-Credit-Miner-mac-${arch}.${ext}
+  extraResources:
+    - from: resources/geth/darwin-${arch}/geth
+      to: geth/geth
 dmg:
+  artifactName: Mars-Credit-Miner-mac-${arch}.${ext}
   contents:
     - x: 130
       y: 220
@@ -28,10 +33,16 @@ dmg:
       path: /Applications
 win:
   target:
-    - nsis
+    - target: nsis
+      arch:
+        - x64
   icon: resources/icons/icon.png
   # Match shortcut target: installer creates shortcut to "Mars Credit Miner.exe"
   executableName: Mars Credit Miner
+  extraResources:
+    - from: resources/geth/win-x64/geth.exe
+      to: geth/geth.exe
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
+  artifactName: Mars-Credit-Miner-win-x64-setup.${ext}
