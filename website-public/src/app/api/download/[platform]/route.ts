@@ -3,9 +3,9 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
 import { NextRequest } from "next/server"
 
 const OBJECT_KEYS: Record<string, string> = {
-  "mac-arm64": "releases/v1.0.0/Mars Credit Miner-1.0.0-arm64.dmg",
-  "mac-x64": "releases/v1.0.0/Mars Credit Miner-1.0.0.dmg",
-  "win": "releases/v1.0.0/Mars Credit Miner Setup 1.0.0.exe",
+  "mac-arm64": "releases/v1.1.0/Mars-Credit-Miner-mac-arm64.dmg",
+  "mac-x64": "releases/v1.1.0/Mars-Credit-Miner-mac-x64.dmg",
+  "win": "releases/v1.1.0/Mars-Credit-Miner-win-x64-setup.exe",
 }
 
 function getS3Client() {
