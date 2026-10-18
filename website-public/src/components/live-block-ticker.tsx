@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from "react"
 
-const BLOCK_INTERVAL_MS = 1500
+// Matches the ~2s target block time after the mars-fast1 fork.
+const BLOCK_INTERVAL_MS = 2000
+// Re-sync with the real chain tip from /api/network on this cadence.
+const SYNC_INTERVAL_MS = 10000
 
 function formatBlockNumber(n: number): string {
   return n.toLocaleString()
@@ -21,10 +24,41 @@ export function LiveBlockTicker({ initialBlock, className = "" }: LiveBlockTicke
   }, [initialBlock])
 
   useEffect(() => {
-    const id = setInterval(() => {
-      setBlock((prev) => prev + 1)
+    let cancelled = false
+
+    const sync = () => {
+      fetch("/api/network", { cache: "no-store" })
+        .then((res) => res.json())
+        .then((data: { block?: number }) => {
+          if (!cancelled && typeof data?.block === "number" && data.block > 0) {
+            const tip = data.block
+            // Jump to the real tip; only keep a locally ticked value if it is a few blocks ahead.
+            setBlock((prev) => (prev > tip && prev - tip <= 5 ? prev : tip))
+          }
+        })
+        .catch(() => {})
+    }
+
+    // Tick between syncs so the counter keeps moving.
+    const tick = setInterval(() => {
+      if (document.visibilityState === "visible") setBlock((prev) => prev + 1)
     }, BLOCK_INTERVAL_MS)
-    return () => clearInterval(id)
+    const poll = setInterval(sync, SYNC_INTERVAL_MS)
+
+    // Background tabs throttle timers, so re-sync as soon as the tab is visible again.
+    const onVisible = () => {
+      if (document.visibilityState === "visible") sync()
+    }
+    document.addEventListener("visibilitychange", onVisible)
+    window.addEventListener("focus", onVisible)
+
+    return () => {
+      cancelled = true
+      clearInterval(tick)
+      clearInterval(poll)
+      document.removeEventListener("visibilitychange", onVisible)
+      window.removeEventListener("focus", onVisible)
+    }
   }, [])
 
   return (
