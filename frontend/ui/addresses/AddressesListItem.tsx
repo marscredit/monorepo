@@ -5,7 +5,7 @@ import React from 'react';
 import type { AddressesItem } from 'types/api/addresses';
 
 import config from 'configs/app';
-import { ZERO } from 'lib/consts';
+import { formatAccountPercentage } from 'lib/addresses/circulatingSupply';
 import { currencyUnits } from 'lib/units';
 import Tag from 'ui/shared/chakra/Tag';
 import AddressEntity from 'ui/shared/entities/address/AddressEntity';
@@ -14,18 +14,27 @@ import ListItemMobile from 'ui/shared/ListItemMobile/ListItemMobile';
 type Props = {
   item: AddressesItem;
   index: number;
-  totalSupply: BigNumber;
+  circulatingSupply: BigNumber | null;
+  supplyExcludedAddresses: Array<string>;
   isLoading?: boolean;
 };
 
 const AddressesListItem = ({
   item,
   index,
-  totalSupply,
+  circulatingSupply,
+  supplyExcludedAddresses,
   isLoading,
 }: Props) => {
 
   const addressBalance = BigNumber(item.coin_balance || 0).div(BigNumber(10 ** config.chain.currency.decimals));
+  const percentageLabel = formatAccountPercentage({
+    hash: item.hash,
+    coinBalance: item.coin_balance,
+    circulatingSupply,
+    decimals: config.chain.currency.decimals,
+    supplyExcludedAddresses,
+  });
 
   return (
     <ListItemMobile rowGap={ 3 }>
@@ -50,14 +59,12 @@ const AddressesListItem = ({
           <span>{ addressBalance.dp(8).toFormat() }</span>
         </Skeleton>
       </HStack>
-      { !totalSupply.eq(ZERO) && (
-        <HStack spacing={ 3 }>
-          <Skeleton isLoaded={ !isLoading } fontSize="sm" fontWeight={ 500 }>Percentage</Skeleton>
-          <Skeleton isLoaded={ !isLoading } fontSize="sm" color="text_secondary">
-            <span>{ addressBalance.div(BigNumber(totalSupply)).multipliedBy(100).dp(8).toFormat() + '%' }</span>
-          </Skeleton>
-        </HStack>
-      ) }
+      <HStack spacing={ 3 }>
+        <Skeleton isLoaded={ !isLoading } fontSize="sm" fontWeight={ 500 }>Percentage</Skeleton>
+        <Skeleton isLoaded={ !isLoading } fontSize="sm" color="text_secondary">
+          <span>{ percentageLabel }</span>
+        </Skeleton>
+      </HStack>
       <HStack spacing={ 3 }>
         <Skeleton isLoaded={ !isLoading } fontSize="sm" fontWeight={ 500 }>Txn count</Skeleton>
         <Skeleton isLoaded={ !isLoading } fontSize="sm" color="text_secondary">

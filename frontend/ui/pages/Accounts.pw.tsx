@@ -2,6 +2,7 @@ import React from 'react';
 
 import type { AddressesResponse } from 'types/api/addresses';
 
+import { DEFAULT_SUPPLY_EXCLUDED_ADDRESS } from 'lib/addresses/parseSupplyExcludedAddresses';
 import * as addressMocks from 'mocks/address/address';
 import { test, expect } from 'playwright/lib';
 
@@ -38,6 +39,14 @@ const addresses: AddressesResponse = {
 test('base view +@mobile +@dark-mode', async({ render, mockTextAd, mockApiResponse }) => {
   await mockTextAd();
   await mockApiResponse('addresses', addresses);
+  await mockApiResponse('stats_coin_supply', 25222000, {
+    queryParams: { module: 'stats', action: 'coinsupply' },
+  });
+  await mockApiResponse('address', {
+    ...addressMocks.eoa,
+    hash: DEFAULT_SUPPLY_EXCLUDED_ADDRESS,
+    coin_balance: '0',
+  }, { pathParams: { hash: DEFAULT_SUPPLY_EXCLUDED_ADDRESS } });
   const component = await render(<Accounts/>);
   await expect(component).toHaveScreenshot();
 });

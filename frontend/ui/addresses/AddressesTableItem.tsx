@@ -5,27 +5,35 @@ import React from 'react';
 import type { AddressesItem } from 'types/api/addresses';
 
 import config from 'configs/app';
+import { formatAccountPercentage } from 'lib/addresses/circulatingSupply';
 import Tag from 'ui/shared/chakra/Tag';
 import AddressEntity from 'ui/shared/entities/address/AddressEntity';
 
 type Props = {
   item: AddressesItem;
   index: number;
-  totalSupply: BigNumber;
-  hasPercentage: boolean;
+  circulatingSupply: BigNumber | null;
+  supplyExcludedAddresses: Array<string>;
   isLoading?: boolean;
 };
 
 const AddressesTableItem = ({
   item,
   index,
-  totalSupply,
-  hasPercentage,
+  circulatingSupply,
+  supplyExcludedAddresses,
   isLoading,
 }: Props) => {
 
   const addressBalance = BigNumber(item.coin_balance || 0).div(BigNumber(10 ** config.chain.currency.decimals));
   const addressBalanceChunks = addressBalance.dp(8).toFormat().split('.');
+  const percentageLabel = formatAccountPercentage({
+    hash: item.hash,
+    coinBalance: item.coin_balance,
+    circulatingSupply,
+    decimals: config.chain.currency.decimals,
+    supplyExcludedAddresses,
+  });
 
   return (
     <Tr>
@@ -53,11 +61,11 @@ const AddressesTableItem = ({
           <Text lineHeight="24px" variant="secondary" as="span">{ addressBalanceChunks[1] }</Text>
         </Skeleton>
       </Td>
-      { hasPercentage && (
-        <Td isNumeric>
-          <Text lineHeight="24px">{ addressBalance.div(totalSupply).multipliedBy(100).dp(8).toFormat() + '%' }</Text>
-        </Td>
-      ) }
+      <Td isNumeric>
+        <Skeleton isLoaded={ !isLoading } display="inline-block">
+          <Text lineHeight="24px">{ percentageLabel }</Text>
+        </Skeleton>
+      </Td>
       <Td isNumeric>
         <Skeleton isLoaded={ !isLoading } display="inline-block" lineHeight="24px">
           { Number(item.transaction_count).toLocaleString() }

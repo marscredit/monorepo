@@ -4,7 +4,6 @@ import React from 'react';
 
 import type { AddressesItem } from 'types/api/addresses';
 
-import { ZERO } from 'lib/consts';
 import { currencyUnits } from 'lib/units';
 import { default as Thead } from 'ui/shared/TheadSticky';
 
@@ -12,22 +11,29 @@ import AddressesTableItem from './AddressesTableItem';
 
 interface Props {
   items: Array<AddressesItem>;
-  totalSupply: BigNumber;
+  circulatingSupply: BigNumber | null;
+  supplyExcludedAddresses: Array<string>;
   pageStartIndex: number;
   top: number;
   isLoading?: boolean;
 }
 
-const AddressesTable = ({ items, totalSupply, pageStartIndex, top, isLoading }: Props) => {
-  const hasPercentage = !totalSupply.eq(ZERO);
+const AddressesTable = ({
+  items,
+  circulatingSupply,
+  supplyExcludedAddresses,
+  pageStartIndex,
+  top,
+  isLoading,
+}: Props) => {
   return (
     <Table>
       <Thead top={ top }>
         <Tr>
           <Th width="64px">Rank</Th>
-          <Th width={ hasPercentage ? '50%' : '60%' }>Address</Th>
-          <Th width={ hasPercentage ? '20%' : '25%' } isNumeric>{ `Balance ${ currencyUnits.ether }` }</Th>
-          { hasPercentage && <Th width="15%" isNumeric>Percentage</Th> }
+          <Th width="50%">Address</Th>
+          <Th width="20%" isNumeric>{ `Balance ${ currencyUnits.ether }` }</Th>
+          <Th width="15%" isNumeric>Percentage</Th>
           <Th width="15%" isNumeric>Txn count</Th>
         </Tr>
       </Thead>
@@ -36,9 +42,9 @@ const AddressesTable = ({ items, totalSupply, pageStartIndex, top, isLoading }: 
           <AddressesTableItem
             key={ item.hash + (isLoading ? index : '') }
             item={ item }
-            totalSupply={ totalSupply }
+            circulatingSupply={ circulatingSupply }
+            supplyExcludedAddresses={ supplyExcludedAddresses }
             index={ pageStartIndex + index }
-            hasPercentage={ hasPercentage }
             isLoading={ isLoading }
           />
         )) }
