@@ -708,6 +708,12 @@ const schema = yup
       .transform(replaceQuotes)
       .json()
       .of(yup.string().matches(/^0x[a-fA-F0-9]{40}$/, 'Invalid hex address in NEXT_PUBLIC_TOP_ACCOUNTS_EXCLUDED_ADDRESSES')),
+    NEXT_PUBLIC_SUPPLY_EXCLUDED_ADDRESSES: yup
+      .string()
+      .matches(
+        /^$|^(0x[a-fA-F0-9]{40})(\s*,\s*0x[a-fA-F0-9]{40})*$/,
+        'NEXT_PUBLIC_SUPPLY_EXCLUDED_ADDRESSES must be a comma-separated list of hex addresses',
+      ),
     NEXT_PUBLIC_VIEWS_CONTRACT_SOLIDITYSCAN_ENABLED: yup.boolean(),
     NEXT_PUBLIC_VIEWS_CONTRACT_EXTRA_VERIFICATION_METHODS: yup
       .mixed()

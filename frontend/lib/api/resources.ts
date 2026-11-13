@@ -707,6 +707,10 @@ export const RESOURCES = {
       'updated-gas-oracle': 'true',
     },
   },
+  // Blockscout RPC-style native coin supply (DB-derived, not CoinGecko/market data)
+  stats_coin_supply: {
+    path: '/api',
+  },
   stats_charts_txs: {
     path: '/api/v2/stats/charts/transactions',
   },
@@ -1313,6 +1317,7 @@ Q extends 'rewards_user_daily_claim' ? RewardsUserDailyClaimResponse :
 Q extends 'rewards_user_referrals' ? RewardsUserReferralsResponse :
 Q extends 'token_transfers_all' ? TokenTransferResponse :
 Q extends 'address_xstar_score' ? AddressXStarResponse :
+Q extends 'stats_coin_supply' ? number | string :
 never;
 /* eslint-enable @stylistic/indent */
 

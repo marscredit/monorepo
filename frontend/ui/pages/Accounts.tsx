@@ -1,10 +1,9 @@
 import { Hide, Show } from '@chakra-ui/react';
-import BigNumber from 'bignumber.js';
 import React from 'react';
 
 import config from 'configs/app';
 import { filterTopAccountsItems } from 'lib/addresses/filterTopAccountsItems';
-import { getTotalSupplyFromItems } from 'lib/addresses/totalSupplyFromItems';
+import useCirculatingSupply from 'lib/hooks/useCirculatingSupply';
 import { TOP_ADDRESS } from 'stubs/address';
 import { generateListStub } from 'stubs/utils';
 import AddressesListItem from 'ui/addresses/AddressesListItem';
@@ -36,24 +35,25 @@ const Accounts = () => {
     },
   });
 
+  const {
+    circulatingSupply,
+    excludedAddresses: supplyExcludedAddresses,
+  } = useCirculatingSupply();
+
   const actionBar = pagination.isVisible && (
     <ActionBar mt={ -6 }>
       <Pagination ml="auto" { ...pagination }/>
     </ActionBar>
   );
 
-  const excludedAddresses = config.UI.views.address.topAccounts.excludedAddresses;
+  const listExcludedAddresses = config.UI.views.address.topAccounts.excludedAddresses;
 
   const visibleItems = React.useMemo(
-    () => filterTopAccountsItems(data?.items, excludedAddresses),
-    [ data?.items, excludedAddresses ],
+    () => filterTopAccountsItems(data?.items, listExcludedAddresses),
+    [ data?.items, listExcludedAddresses ],
   );
 
   const pageStartIndex = (pagination.page - 1) * PAGE_SIZE + 1;
-  const totalSupply = React.useMemo(
-    () => getTotalSupplyFromItems(visibleItems, config.chain.currency.decimals),
-    [ visibleItems, config.chain.currency.decimals ],
-  );
 
   const content = visibleItems ? (
     <>
@@ -61,7 +61,8 @@ const Accounts = () => {
         <AddressesTable
           top={ pagination.isVisible ? ACTION_BAR_HEIGHT_DESKTOP : 0 }
           items={ visibleItems }
-          totalSupply={ totalSupply }
+          circulatingSupply={ circulatingSupply }
+          supplyExcludedAddresses={ supplyExcludedAddresses }
           pageStartIndex={ pageStartIndex }
           isLoading={ isPlaceholderData }
         />
@@ -73,7 +74,8 @@ const Accounts = () => {
               key={ item.hash + (isPlaceholderData ? index : '') }
               item={ item }
               index={ pageStartIndex + index }
-              totalSupply={ totalSupply }
+              circulatingSupply={ circulatingSupply }
+              supplyExcludedAddresses={ supplyExcludedAddresses }
               isLoading={ isPlaceholderData }
             />
           );

@@ -4,6 +4,7 @@ import type { AddressFormat, AddressViewId, IdenticonType } from 'types/views/ad
 import { ADDRESS_FORMATS, ADDRESS_VIEWS_IDS, IDENTICON_TYPES } from 'types/views/address';
 
 import { getEnvValue, parseEnvJson } from 'configs/app/utils';
+import { parseSupplyExcludedAddresses } from 'lib/addresses/parseSupplyExcludedAddresses';
 
 const identiconType: IdenticonType = (() => {
   const value = getEnvValue('NEXT_PUBLIC_VIEWS_ADDRESS_IDENTICON_TYPE');
@@ -60,6 +61,10 @@ const topAccountsExcludedAddresses = (() => {
     .map((address) => address.toLowerCase());
 })();
 
+const supplyExcludedAddresses = parseSupplyExcludedAddresses(
+  getEnvValue('NEXT_PUBLIC_SUPPLY_EXCLUDED_ADDRESSES'),
+);
+
 const extraVerificationMethods: Array<SmartContractVerificationMethodExtra> = (() => {
   const envValue = getEnvValue('NEXT_PUBLIC_VIEWS_CONTRACT_EXTRA_VERIFICATION_METHODS');
   if (envValue === 'none') {
@@ -84,6 +89,7 @@ const config = Object.freeze({
   hiddenViews,
   topAccounts: {
     excludedAddresses: topAccountsExcludedAddresses,
+    supplyExcludedAddresses,
   },
   solidityscanEnabled: getEnvValue('NEXT_PUBLIC_VIEWS_CONTRACT_SOLIDITYSCAN_ENABLED') === 'true',
   extraVerificationMethods,
