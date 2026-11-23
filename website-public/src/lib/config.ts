@@ -26,7 +26,9 @@ export const links = {
   instagram: "https://instagram.com/marscredit.xyz",
   blockscan: "https://blockscan.marscredit.xyz/",
   mining: "https://github.com/marscredit/go-marscredit",
+  startMining: "/start-mining",
   rpc: "https://rpc.marscredit.xyz/",
+  chainlist: "https://chainlist.org/chain/110110",
   whitepaper: "/media/6801abc67810b757a599364a_Mars%2520Credit%2520-%2520Whitepaper.pdf.pdf",
 } as const
 
