@@ -8,6 +8,9 @@ export const SYMBOL = "MARS"
 export const DECIMALS = 18
 export const BLOCK_REWARD = "2"
 export const FORK_BLOCK = 5_145_000
+/** mars-fast1 fork hash at FORK_BLOCK — pin so new nodes stay on the public chain. */
+export const FORK_HASH = "0x622f1c0928884b81e631d50b69f44c58fd071852959c09c221c021ddd6571e09"
+export const REQUIRED_BLOCKS_FLAG = `--eth.requiredblocks ${FORK_BLOCK}=${FORK_HASH}`
 export const LOCAL_RPC = "http://127.0.0.1:8545"
 export const LOCAL_GETH_HTTP_PORT = 8545
 
@@ -31,12 +34,6 @@ export const BOOTNODES = [
 
 export const BOOTNODES_FLAG = BOOTNODES.join(",")
 
-/**
- * `--eth.requiredblocks 5145000=<hash>` is omitted: the full fork hash was
- * not present in repo configs (only a truncated 0x622f…6e09 hint). Do not
- * invent it. The mars-fast1 fork is keyed by chain ID 110110 at block 5,145,000.
- */
-
 export const BUILD_GETH = `git clone https://github.com/marscredit/go-marscredit.git
 cd go-marscredit
 git checkout mars-fast-v1
@@ -47,6 +44,7 @@ export const INIT_NODE = `./build/bin/geth --datadir "$HOME/.marscredit" init ge
 export const RUN_CPU_MINER = `./build/bin/geth \\
   --datadir "$HOME/.marscredit" \\
   --networkid ${CHAIN_ID} \\
+  ${REQUIRED_BLOCKS_FLAG} \\
   --syncmode full \\
   --http --http.addr 127.0.0.1 --http.port ${LOCAL_GETH_HTTP_PORT} \\
   --http.api eth,net,web3,miner \\

@@ -21,6 +21,7 @@ import {
   GO_MARS_REPO,
   INIT_NODE,
   LOCAL_RPC,
+  REQUIRED_BLOCKS_FLAG,
   RUN_CPU_MINER,
   STATIC_NODES_JSON,
   SYMBOL,
@@ -145,7 +146,8 @@ export default function StartMiningPage() {
           <p className="text-text-med leading-relaxed">
             You need the <code className="text-mars-200">mars-fast-v1</code> client (prints{" "}
             <code className="text-mars-200">1.10.18-mars-fast1</code>). The 2-second block fork activated at block{" "}
-            {FORK_BLOCK.toLocaleString("en-US")}. Until official Linux packages land, build from that branch:
+            {FORK_BLOCK.toLocaleString("en-US")}. A pre-fork geth build will follow the wrong chain. Until official
+            Linux packages land, build from that branch:
           </p>
           <CopyBlock label="Build" code={BUILD_GETH} />
           <CopyBlock label="Initialize" code={INIT_NODE} />
@@ -155,6 +157,11 @@ export default function StartMiningPage() {
             the same machine can call getWork locally — not the public internet.
           </p>
           <CopyBlock label="Run (CPU mine on your node)" code={RUN_CPU_MINER} />
+          <p className="text-sm text-text-med leading-relaxed">
+            <code className="text-mars-200">{REQUIRED_BLOCKS_FLAG}</code> plus{" "}
+            <code className="text-mars-200">--networkid {CHAIN_ID}</code> keeps the node on the public chain after
+            the fork.
+          </p>
           <p className="text-sm text-text-lo">
             Railway bootnodes are TCP-only. Put the same enodes in{" "}
             <code className="text-text-med">$HOME/.marscredit/geth/static-nodes.json</code> so geth re-dials them
@@ -174,7 +181,14 @@ export default function StartMiningPage() {
             GPU miners (ethminer, similar Ethash miners, HiveOS flight sheets) must talk to{" "}
             <strong>your own geth</strong> over getWork on localhost. That means the node from the Linux section
             (or the Mac/Windows app) is running on the same LAN machine the GPUs can reach, with HTTP on{" "}
-            <code className="text-mars-200">{LOCAL_RPC}</code>.
+            <code className="text-mars-200">{LOCAL_RPC}</code>. Run that node with the same fork pin and chain ID{" "}
+            {CHAIN_ID} — a pre-fork geth build will follow the wrong chain.
+          </p>
+          <CopyBlock label="Run (local node for GPU getWork)" code={RUN_CPU_MINER} />
+          <p className="text-sm text-text-med leading-relaxed">
+            <code className="text-mars-200">{REQUIRED_BLOCKS_FLAG}</code> plus{" "}
+            <code className="text-mars-200">--networkid {CHAIN_ID}</code> keeps the node on the public chain after
+            the fork.
           </p>
           <div className="rounded-xl border border-mars-500/40 bg-mars-950/40 p-4 space-y-2">
             <div className="text-sm font-semibold uppercase tracking-wider text-mars-300">Hard rules</div>
