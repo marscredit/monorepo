@@ -28,7 +28,7 @@ export async function GET(
   const key = OBJECT_KEYS[platform]
 
   if (!key) {
-    return new Response("Invalid platform. Use: mac-arm64, mac-x64, win", {
+    return new Response("Invalid platform. Use: mac-arm64, mac-x64, win. Linux has no GUI miner — see /start-mining#linux", {
       status: 400,
     })
   }

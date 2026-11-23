@@ -6,16 +6,19 @@ import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { links } from "@/lib/config"
 import { cn } from "@/lib/utils"
-import { ExternalLink, Github, Download, ChevronDown, X } from "lucide-react"
-import { DOWNLOADS } from "@/lib/download"
+import { ExternalLink, Github, Download, ChevronDown, X, Pickaxe } from "lucide-react"
+import { DOWNLOADS, LINUX_DOWNLOAD } from "@/lib/download"
 
 const navigation = [
   { name: "Home", href: "/" },
+  { name: "Start Mining", href: "/start-mining" },
   { name: "The Story", href: "/story" },
   { name: "Tokenomics", href: "/tokenomics" },
   { name: "Updates", href: "/updates" },
   { name: "Blockscan", href: links.blockscan, external: true },
 ]
+
+const downloadItems = [...DOWNLOADS, LINUX_DOWNLOAD]
 
 export function Navigation() {
   const pathname = usePathname()
@@ -47,13 +50,12 @@ export function Navigation() {
       <div
         className={cn(
           "w-full max-w-5xl rounded-full border border-white/10 transition-all duration-300 shadow-2xl shadow-black/50",
-          isScrolled 
-            ? "bg-black/40 backdrop-blur-2xl" 
+          isScrolled
+            ? "bg-black/40 backdrop-blur-2xl"
             : "bg-black/30 backdrop-blur-2xl"
         )}
       >
         <div className="flex h-14 items-center justify-between px-6">
-          {/* Logo */}
           <Link href="/" className="flex items-center">
             <Image
               src="/brand/marscredit_square_transparent.png"
@@ -68,16 +70,15 @@ export function Navigation() {
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
+          <nav className="hidden lg:flex items-center space-x-6">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
                 className={cn(
                   "text-sm font-medium transition-colors hover:text-white",
-                  pathname === item.href 
-                    ? "text-white" 
+                  pathname === item.href
+                    ? "text-white"
                     : "text-white/70"
                 )}
                 {...(item.external && { target: "_blank", rel: "noopener noreferrer" })}
@@ -88,7 +89,6 @@ export function Navigation() {
             ))}
           </nav>
 
-          {/* Action Buttons */}
           <div className="hidden md:flex items-center space-x-2">
             <div ref={downloadRef} className="relative">
               <button
@@ -102,14 +102,18 @@ export function Navigation() {
               </button>
               {isDownloadOpen && (
                 <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-white/10 bg-black/80 backdrop-blur-2xl shadow-2xl shadow-black/50 py-2">
-                  {DOWNLOADS.map((dl) => (
+                  {downloadItems.map((dl) => (
                     <a
                       key={dl.platform}
                       href={dl.url}
                       onClick={() => setIsDownloadOpen(false)}
                       className="flex items-center px-4 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/10 transition-colors"
                     >
-                      <Download className="mr-2 h-4 w-4 shrink-0" />
+                      {dl.platform === "linux" ? (
+                        <Pickaxe className="mr-2 h-4 w-4 shrink-0" />
+                      ) : (
+                        <Download className="mr-2 h-4 w-4 shrink-0" />
+                      )}
                       {dl.label}
                     </a>
                   ))}
@@ -127,10 +131,10 @@ export function Navigation() {
             </Link>
           </div>
 
-          {/* Mobile menu button */}
-          <button 
+          <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden text-white"
+            className="lg:hidden text-white"
+            aria-label="Toggle menu"
           >
             {isMobileMenuOpen ? (
               <X className="h-6 w-6" />
@@ -143,9 +147,8 @@ export function Navigation() {
         </div>
       </div>
 
-      {/* Mobile Menu - Separate Dropdown */}
       {isMobileMenuOpen && (
-        <div className="md:hidden w-full max-w-5xl mt-2 rounded-2xl border border-white/10 bg-black/40 backdrop-blur-2xl shadow-2xl shadow-black/50 py-4 px-6">
+        <div className="lg:hidden w-full max-w-5xl mt-2 rounded-2xl border border-white/10 bg-black/40 backdrop-blur-2xl shadow-2xl shadow-black/50 py-4 px-6">
           <nav className="flex flex-col space-y-4">
             {navigation.map((item) => (
               <Link
@@ -154,8 +157,8 @@ export function Navigation() {
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={cn(
                   "text-sm font-medium transition-colors hover:text-white",
-                  pathname === item.href 
-                    ? "text-white" 
+                  pathname === item.href
+                    ? "text-white"
                     : "text-white/70"
                 )}
                 {...(item.external && { target: "_blank", rel: "noopener noreferrer" })}
@@ -166,14 +169,18 @@ export function Navigation() {
             ))}
             <div className="pt-4 border-t border-white/10 flex flex-col space-y-2">
               <span className="text-xs font-medium text-white/50 uppercase tracking-wider px-1">Download Miner</span>
-              {DOWNLOADS.map((dl) => (
+              {downloadItems.map((dl) => (
                 <a
                   key={dl.platform}
                   href={dl.url}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="inline-flex items-center text-sm font-medium transition-colors hover:text-white px-3 py-2 rounded-full bg-white/10 text-white hover:bg-white/20"
                 >
-                  <Download className="mr-1.5 h-4 w-4" />
+                  {dl.platform === "linux" ? (
+                    <Pickaxe className="mr-1.5 h-4 w-4" />
+                  ) : (
+                    <Download className="mr-1.5 h-4 w-4" />
+                  )}
                   {dl.label}
                 </a>
               ))}
