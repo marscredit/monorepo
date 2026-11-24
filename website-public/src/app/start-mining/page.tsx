@@ -11,18 +11,27 @@ import {
   CHAIN_ID,
   CHAINLIST,
   DECIMALS,
+  DOWNLOAD_GETH_AMD64,
+  DOWNLOAD_GETH_ARM64,
   ETHMINER_LOCAL,
+  FETCH_NETWORK_FILES,
   FORK_BLOCK,
+  GETH_LINUX_AMD64,
+  GETH_LINUX_ARM64,
+  GETH_RELEASE,
+  GETH_SHA256SUMS_URL,
   GO_MARS_FAST_DOCS,
   GO_MARS_GENESIS,
   GO_MARS_MINER_DOCS,
   GO_MARS_README,
-  GO_MARS_RELEASES,
   GO_MARS_REPO,
+  GO_MARS_STATIC_NODES,
   INIT_NODE,
+  INIT_NODE_BIN,
   LOCAL_RPC,
   REQUIRED_BLOCKS_FLAG,
   RUN_CPU_MINER,
+  RUN_CPU_MINER_BIN,
   STATIC_NODES_JSON,
   SYMBOL,
 } from "@/lib/mining"
@@ -120,43 +129,56 @@ export default function StartMiningPage() {
         <section id="linux" className="space-y-4 scroll-mt-28">
           <h2 className="text-2xl font-semibold text-text-hi">Linux — run your own node and CPU-mine</h2>
           <p className="text-text-med leading-relaxed">
-            Linux users run <strong>go-marscredit</strong> (geth) themselves. Official Linux binaries are being
-            produced in that repository now — we will not invent download URLs. Use the README and releases page:
+            Linux users run <strong>go-marscredit</strong> (geth) themselves. Official binaries are published as{" "}
+            <Ext href={GETH_RELEASE}>{GETH_RELEASE}</Ext>
+            {" "}(<code className="text-mars-200">1.10.18-mars-fast1</code>).{" "}
+            <code className="text-mars-200">geth version</code> must print that string. A pre-fork geth build will
+            follow the wrong chain. Step-by-step:{" "}
+            <Ext href={GO_MARS_MINER_DOCS}>docs/MINING.md</Ext>.
           </p>
           <ul className="list-disc pl-6 text-text-med space-y-1">
             <li>
-              Repository: <Ext href={GO_MARS_REPO}>{GO_MARS_REPO}</Ext>
+              amd64: <Ext href={GETH_LINUX_AMD64.url}>{GETH_LINUX_AMD64.url}</Ext>
+              <div className="text-sm text-text-lo font-mono break-all">sha256 {GETH_LINUX_AMD64.sha256}</div>
             </li>
             <li>
-              Build from source: <Ext href={GO_MARS_README}>Building the source</Ext>
+              arm64: <Ext href={GETH_LINUX_ARM64.url}>{GETH_LINUX_ARM64.url}</Ext>
+              <div className="text-sm text-text-lo font-mono break-all">sha256 {GETH_LINUX_ARM64.sha256}</div>
             </li>
             <li>
-              Mining notes: <Ext href={GO_MARS_MINER_DOCS}>Running a private miner</Ext>
+              Checksums: <Ext href={GETH_SHA256SUMS_URL}>{GETH_SHA256SUMS_URL}</Ext>
             </li>
             <li>
-              Fast-block fork (mars-fast1): <Ext href={GO_MARS_FAST_DOCS}>MARS_FAST.md on mars-fast-v1</Ext>
+              Genesis (mars-fast-v1): <Ext href={GO_MARS_GENESIS}>{GO_MARS_GENESIS}</Ext>
             </li>
             <li>
-              Binary placeholder: <Ext href={GO_MARS_RELEASES}>{GO_MARS_RELEASES}</Ext>
+              static-nodes (mars-fast-v1): <Ext href={GO_MARS_STATIC_NODES}>{GO_MARS_STATIC_NODES}</Ext>
             </li>
             <li>
-              Genesis: <Ext href={GO_MARS_GENESIS}>genesis.json</Ext>
+              Fast-block fork: <Ext href={GO_MARS_FAST_DOCS}>MARS_FAST.md</Ext>
             </li>
           </ul>
           <p className="text-text-med leading-relaxed">
-            You need the <code className="text-mars-200">mars-fast-v1</code> client (prints{" "}
-            <code className="text-mars-200">1.10.18-mars-fast1</code>). The 2-second block fork activated at block{" "}
-            {FORK_BLOCK.toLocaleString("en-US")}. A pre-fork geth build will follow the wrong chain. Until official
-            Linux packages land, build from that branch:
+            Download the binary for your CPU, verify it against SHA256SUMS, then make it executable:
           </p>
-          <CopyBlock label="Build" code={BUILD_GETH} />
-          <CopyBlock label="Initialize" code={INIT_NODE} />
+          <CopyBlock label="Download + verify (amd64)" code={DOWNLOAD_GETH_AMD64} />
+          <CopyBlock label="Download + verify (arm64)" code={DOWNLOAD_GETH_ARM64} />
+          <p className="text-text-med leading-relaxed">
+            Fetch genesis and the current static-nodes from the <code className="text-mars-200">mars-fast-v1</code>{" "}
+            branch (not an older tag, which can lag):
+          </p>
+          <CopyBlock label="Network files" code={FETCH_NETWORK_FILES} />
+          <CopyBlock label="Initialize" code={INIT_NODE_BIN} />
+          <p className="text-sm text-text-lo">
+            On arm64, replace <code className="text-text-med">geth-linux-amd64</code> with{" "}
+            <code className="text-text-med">geth-linux-arm64</code> in the init and run commands.
+          </p>
           <p className="text-text-med leading-relaxed">
             Then start the node bound to <strong>localhost</strong>, mining to your address. Replace{" "}
             <code className="text-mars-200">0xYOUR_REWARD_ADDRESS</code>. HTTP is 127.0.0.1 only so GPU miners on
             the same machine can call getWork locally — not the public internet.
           </p>
-          <CopyBlock label="Run (CPU mine on your node)" code={RUN_CPU_MINER} />
+          <CopyBlock label="Run (CPU mine on your node)" code={RUN_CPU_MINER_BIN} />
           <p className="text-sm text-text-med leading-relaxed">
             <code className="text-mars-200">{REQUIRED_BLOCKS_FLAG}</code> plus{" "}
             <code className="text-mars-200">--networkid {CHAIN_ID}</code> keeps the node on the public chain after
@@ -173,18 +195,28 @@ export default function StartMiningPage() {
               <li key={e} className="break-all font-mono">{e}</li>
             ))}
           </ul>
+
+          <h3 className="text-xl font-semibold text-text-hi pt-4">Alternative: build from source</h3>
+          <p className="text-text-med leading-relaxed">
+            If you prefer to compile, use the <code className="text-mars-200">mars-fast-v1</code> branch. Then init
+            and run with <code className="text-mars-200">./build/bin/geth</code> instead of the downloaded binary,
+            same flags. See <Ext href={GO_MARS_README}>Building the source</Ext>.
+          </p>
+          <CopyBlock label="Build from source" code={BUILD_GETH} />
+          <CopyBlock label="Initialize (from source)" code={INIT_NODE} />
+          <CopyBlock label="Run (from source)" code={RUN_CPU_MINER} />
         </section>
 
         <section id="gpu" className="space-y-4 scroll-mt-28">
           <h2 className="text-2xl font-semibold text-text-hi">GPU and HiveOS — solo against your local node</h2>
           <p className="text-text-med leading-relaxed">
             GPU miners (ethminer, similar Ethash miners, HiveOS flight sheets) must talk to{" "}
-            <strong>your own geth</strong> over getWork on localhost. That means the node from the Linux section
-            (or the Mac/Windows app) is running on the same LAN machine the GPUs can reach, with HTTP on{" "}
-            <code className="text-mars-200">{LOCAL_RPC}</code>. Run that node with the same fork pin and chain ID{" "}
-            {CHAIN_ID} — a pre-fork geth build will follow the wrong chain.
+            <strong>your own geth</strong> over getWork on localhost. Download the official Linux binary from the
+            Linux section (or use the Mac/Windows app), then run that node on the same LAN machine the GPUs can
+            reach, with HTTP on <code className="text-mars-200">{LOCAL_RPC}</code>. Run it with the same fork pin
+            and chain ID {CHAIN_ID} — a pre-fork geth build will follow the wrong chain.
           </p>
-          <CopyBlock label="Run (local node for GPU getWork)" code={RUN_CPU_MINER} />
+          <CopyBlock label="Run (local node for GPU getWork)" code={RUN_CPU_MINER_BIN} />
           <p className="text-sm text-text-med leading-relaxed">
             <code className="text-mars-200">{REQUIRED_BLOCKS_FLAG}</code> plus{" "}
             <code className="text-mars-200">--networkid {CHAIN_ID}</code> keeps the node on the public chain after

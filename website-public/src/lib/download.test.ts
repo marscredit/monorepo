@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { detectOsFamily, getMinerCta, getMinerDownloadUrl, LINUX_MINING_HREF, START_MINING_HREF } from "./download"
+import { detectOsFamily, getMinerCta, getMinerDownloadUrl, LINUX_DOWNLOAD, LINUX_MINING_HREF, START_MINING_HREF } from "./download"
 
 describe("detectOsFamily", () => {
   it("detects Windows", () => {
@@ -60,6 +60,13 @@ describe("getMinerCta", () => {
     const cta = getMinerCta({ userAgent: "UnknownBot/1.0", platform: "" })
     expect(cta.kind).toBe("guide")
     expect(cta.href).toBe(START_MINING_HREF)
+  })
+})
+
+describe("Download Miner menu", () => {
+  it("sends Linux to the start-mining Linux section, not a binary URL", () => {
+    expect(LINUX_DOWNLOAD.url).toBe("/start-mining#linux")
+    expect(LINUX_DOWNLOAD.platform).toBe("linux")
   })
 })
 
