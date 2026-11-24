@@ -16,11 +16,31 @@ export const LOCAL_GETH_HTTP_PORT = 8545
 
 export const GO_MARS_REPO = "https://github.com/marscredit/go-marscredit"
 export const GO_MARS_README = "https://github.com/marscredit/go-marscredit#building-the-source"
-export const GO_MARS_MINER_DOCS = "https://github.com/marscredit/go-marscredit#running-a-private-miner"
+export const GO_MARS_MINER_DOCS = "https://github.com/marscredit/go-marscredit/blob/mars-fast-v1/docs/MINING.md"
 export const GO_MARS_FAST_DOCS = "https://github.com/marscredit/go-marscredit/blob/mars-fast-v1/MARS_FAST.md"
 export const GO_MARS_RELEASES = "https://github.com/marscredit/go-marscredit/releases"
-export const GO_MARS_GENESIS = "https://github.com/marscredit/go-marscredit/blob/master/genesis.json"
+export const GO_MARS_GENESIS =
+  "https://raw.githubusercontent.com/marscredit/go-marscredit/mars-fast-v1/genesis.json"
+export const GO_MARS_STATIC_NODES =
+  "https://raw.githubusercontent.com/marscredit/go-marscredit/mars-fast-v1/static-nodes.json"
 export const CHAINLIST = "https://chainlist.org/chain/110110"
+
+export const GETH_RELEASE_TAG = "v1.10.18-mars-fast1"
+export const GETH_RELEASE = `https://github.com/marscredit/go-marscredit/releases/tag/${GETH_RELEASE_TAG}`
+export const GETH_SHA256SUMS_URL =
+  `https://github.com/marscredit/go-marscredit/releases/download/${GETH_RELEASE_TAG}/SHA256SUMS`
+
+export const GETH_LINUX_AMD64 = {
+  filename: "geth-linux-amd64",
+  url: `https://github.com/marscredit/go-marscredit/releases/download/${GETH_RELEASE_TAG}/geth-linux-amd64`,
+  sha256: "13a0700a364a17f1504c75c73fb7c132ef3fc8d15b88a12623d2a533ca3dcf56",
+} as const
+
+export const GETH_LINUX_ARM64 = {
+  filename: "geth-linux-arm64",
+  url: `https://github.com/marscredit/go-marscredit/releases/download/${GETH_RELEASE_TAG}/geth-linux-arm64`,
+  sha256: "f84779f88d87926112362724176b2fc30fa43d985fc848d2e344f79f9ccefb46",
+} as const
 
 /**
  * Bootnodes used by the Mars Credit Miner app (TCP proxies). Discovery (UDP)
@@ -34,15 +54,31 @@ export const BOOTNODES = [
 
 export const BOOTNODES_FLAG = BOOTNODES.join(",")
 
+export const DOWNLOAD_GETH_AMD64 = `curl -fL -O ${GETH_LINUX_AMD64.url}
+curl -fL -O ${GETH_SHA256SUMS_URL}
+grep ${GETH_LINUX_AMD64.filename} SHA256SUMS | sha256sum -c
+chmod +x ${GETH_LINUX_AMD64.filename}`
+
+export const DOWNLOAD_GETH_ARM64 = `curl -fL -O ${GETH_LINUX_ARM64.url}
+curl -fL -O ${GETH_SHA256SUMS_URL}
+grep ${GETH_LINUX_ARM64.filename} SHA256SUMS | sha256sum -c
+chmod +x ${GETH_LINUX_ARM64.filename}`
+
+export const FETCH_NETWORK_FILES = `curl -fL -o genesis.json ${GO_MARS_GENESIS}
+curl -fL -o static-nodes.json ${GO_MARS_STATIC_NODES}
+mkdir -p "$HOME/.marscredit/geth"
+cp static-nodes.json "$HOME/.marscredit/geth/static-nodes.json"`
+
 export const BUILD_GETH = `git clone https://github.com/marscredit/go-marscredit.git
 cd go-marscredit
 git checkout mars-fast-v1
 make geth`
 
+export const INIT_NODE_BIN = `./geth-linux-amd64 --datadir "$HOME/.marscredit" init genesis.json`
+
 export const INIT_NODE = `./build/bin/geth --datadir "$HOME/.marscredit" init genesis.json`
 
-export const RUN_CPU_MINER = `./build/bin/geth \\
-  --datadir "$HOME/.marscredit" \\
+const RUN_FLAGS = `--datadir "$HOME/.marscredit" \\
   --networkid ${CHAIN_ID} \\
   ${REQUIRED_BLOCKS_FLAG} \\
   --syncmode full \\
@@ -51,6 +87,12 @@ export const RUN_CPU_MINER = `./build/bin/geth \\
   --bootnodes "${BOOTNODES_FLAG}" \\
   --mine --miner.threads 1 \\
   --miner.etherbase 0xYOUR_REWARD_ADDRESS`
+
+export const RUN_CPU_MINER_BIN = `./geth-linux-amd64 \\
+  ${RUN_FLAGS}`
+
+export const RUN_CPU_MINER = `./build/bin/geth \\
+  ${RUN_FLAGS}`
 
 export const ETHMINER_LOCAL = `ethminer -P ${LOCAL_RPC}`
 
